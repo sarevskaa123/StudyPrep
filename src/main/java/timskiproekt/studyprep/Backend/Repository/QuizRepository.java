@@ -6,4 +6,7 @@ import timskiproekt.studyprep.Backend.Model.Quiz;
 
 @Repository
 public interface QuizRepository extends JpaRepository<Quiz, Integer> {
+
+    void deleteByQuizTitle(String title);
+
 }

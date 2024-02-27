@@ -1,18 +1,30 @@
 package timskiproekt.studyprep.Backend.Model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import javax.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
-@Entity
 @Data
+@Entity
 public class Answer {
-    @GeneratedValue(strategy = GenerationType.AUTO)
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int answerId;
     private String answerText;
     private Boolean isCorrect;
-    private int questionId;
+    @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "questionId")
+    private Question question;
+
+
+    public Answer(String answerText, Boolean isCorrect, Question question) {
+        this.answerText = answerText;
+        this.isCorrect = isCorrect;
+        this.question = question;
+    }
+
+    public Answer() {
+    }
 }

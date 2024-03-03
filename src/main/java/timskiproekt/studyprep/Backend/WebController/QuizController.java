@@ -1,6 +1,7 @@
 package timskiproekt.studyprep.Backend.WebController;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import timskiproekt.studyprep.Backend.Model.DTO.QuizDto;
 import timskiproekt.studyprep.Backend.Model.Quiz;
@@ -42,6 +43,7 @@ public class QuizController {
 
 
     @PostMapping("/addQuiz")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Quiz> addQuiz(@RequestBody QuizDto quizDto) {
         return this.quizService.save(quizDto)
                 .map(quiz -> ResponseEntity.ok().body(quiz))

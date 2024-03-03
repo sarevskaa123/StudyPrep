@@ -50,12 +50,19 @@ const StudyPrepService = {
             "repeatPassword":repeatPassword
         });
     },
-    login: (email, password) => {
-        return axios.post("/login/user", {
-            "email": email,
+    login: (username, password) => {
+        return axios.post("/login", {
+            "username": username,
             "password": password
         });
     },
+
+    // login: (email, password) => {
+    //     return axios.post("/login/user", {
+    //         "email": email,
+    //         "password": password
+    //     });
+    // },
     // getAllMultipleQuestions:(id) =>{
     //     return axios.get(`/question/multiple/${id}`);
     // },

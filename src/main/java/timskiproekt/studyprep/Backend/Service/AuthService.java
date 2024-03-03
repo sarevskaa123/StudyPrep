@@ -6,5 +6,5 @@ import timskiproekt.studyprep.Backend.Model.User;
 import java.util.Optional;
 
 public interface AuthService {
-    Optional<User> login(LoginDTO loginDTO);
+    User login(String username, String password);
 }

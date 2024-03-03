@@ -2,7 +2,11 @@ import React from 'react';
 
 const Home = (props) => {
 
-    console.log(props.user)
+    console.log(localStorage.getItem("Username"))
+    console.log(localStorage.getItem("Email"))
+    console.log(localStorage.getItem("Userrole"))
+    console.log(localStorage.getItem("UserId"))
+
 
     return (
         <div>

@@ -31,7 +31,9 @@ class App extends Component {
     render() {
         return (
             <Router>
-                <Header user={this.state.user} onDelete={this.logout}/>
+                <Header user={this.state.user}
+                        // onDelete={this.logout}
+                />
                 <main>
                     <div className={"container"}>
                         <Routes>
@@ -73,7 +75,7 @@ class App extends Component {
                                                                 quiz={this.state.selectedQuiz}/>}/>
                             <Route path={"/profile"}/>
                             <Route path={"/quizzes"}/>
-                            <Route path={"/login"} element={<Login onLogin={this.login}/>}/>
+                            <Route path={"/login"} element={<Login onLogin={this.fetchData}/>}/>
                             <Route path={"/register"} element={<Register onRegister={this.fetchData}/>}/>
                             <Route path={"/"} element={<Home user={this.state.user}/>}/>
                         </Routes>
@@ -155,20 +157,20 @@ class App extends Component {
     //     StudyPrepService.register(username,email,password,repeatPassword).then()
     // }
 
-    login = (email, password) => {
-        StudyPrepService.login(email, password)
-            .then(resp => {
-                this.setState({
-                    user: resp.data
-                })
-            })
-    }
+    // login = (username, password) => {
+    //     StudyPrepService.login(username, password)
+    //         .then(resp => {
+    //             this.setState({
+    //                 user: resp.data
+    //             })
+    //         })
+    // }
 
-    logout = () => {
-        this.setState({
-            user: null
-        })
-    }
+    // logout = () => {
+    //     this.setState({
+    //         user: null
+    //     })
+    // }
 
     questionSingleCreate = (questionText, quizId, answer1, answer2, answer3, answer4, answerCorrect) => {
         StudyPrepService.createSingleQuestion(questionText, quizId, answer1, answer2, answer3, answer4, answerCorrect)

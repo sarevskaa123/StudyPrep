@@ -4,23 +4,27 @@ import {Link} from 'react-router-dom';
 const header = (props) => {
 
     let authenticate
-    if (props.user == null) {
-        authenticate = (<div><Link className="btn btn-outline-info my-2 my-sm-0" to={"/login"}>Login</Link>
-            <Link className="btn btn-outline-info my-2 my-sm-0" to={"/register"}>Register</Link></div>);
+    if (localStorage.getItem("Username")) {
+        authenticate = (<div>
+            <Link className="btn btn-outline-info my-2 my-sm-0" to={"/profile"}>Profile</Link>
+            <button className="btn btn-outline-info my-2 my-sm-0"
+                    onClick={() => {localStorage.removeItem("Username"); localStorage.removeItem("Email");
+                        localStorage.removeItem("Userrole")}}>Logout
+            </button>
+        </div>);
     } else {
         authenticate =
-            (<div>
-                <Link className="btn btn-outline-info my-2 my-sm-0" to={"/profile"}>Profile</Link>
-                <button className="btn btn-outline-info my-2 my-sm-0"
-                        onClick={() => props.onDelete()}>Logout</button>
-            </div>);
+            (<div><Link className="btn btn-outline-info my-2 my-sm-0" to={"/login"}>Login</Link>
+                <Link className="btn btn-outline-info my-2 my-sm-0" to={"/register"}>Register</Link></div>);
     }
 
     let admin
-    if(props.user !== null && props.user.userRole === "ADMIN"){
+    if (localStorage.getItem("Userrole") === "ADMIN") {
+        admin= (
         <li className="nav-item active">
             <Link className={"nav-link"} to={"/admin"}>Admin</Link>
         </li>
+        )
     }
 
     return (
@@ -37,9 +41,9 @@ const header = (props) => {
                             <Link className="nav-link" to={"/quizzes"}>Quizzes</Link>
                         </li>
                         {admin}
-                       <li className="nav-item active">
-                            <Link className={"nav-link"} to={"/admin"}>Admin</Link>
-                        </li>
+                        {/*<li className="nav-item active">*/}
+                        {/*    <Link className={"nav-link"} to={"/admin"}>Admin</Link>*/}
+                        {/*</li>*/}
                     </ul>
                     {authenticate}
                     {/*<button className="btn btn-outline-info my-2 my-sm-0">Logout</button>*/}

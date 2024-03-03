@@ -2,9 +2,9 @@ package timskiproekt.studyprep.Backend.Service.Implementation;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import timskiproekt.studyprep.Backend.Model.DTO.LoginDTO;
 import timskiproekt.studyprep.Backend.Model.User;
 import timskiproekt.studyprep.Backend.Model.exceptions.InvalidArgumentsException;
+import timskiproekt.studyprep.Backend.Model.exceptions.InvalidUserCredentialsException;
 import timskiproekt.studyprep.Backend.Repository.UserRepository;
 import timskiproekt.studyprep.Backend.Service.AuthService;
 
@@ -22,15 +22,15 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Optional<User> login(LoginDTO loginDTO) {
-        if (loginDTO.getEmail()==null || loginDTO.getEmail().isEmpty() || loginDTO.getPassword()==null || loginDTO.getPassword().isEmpty()) {
+    public User login(String username,String password) {
+        if (username==null || username.isEmpty() || password==null || password.isEmpty()) {
             throw new InvalidArgumentsException();
         }
-        User user = userRepository.findByEmail(loginDTO.getEmail());
-        if (passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())){
-            return Optional.of(user);
-        }
-        return Optional.empty();
+
+        return userRepository.findByUsernameAndPassword(username,
+                password).orElseThrow(InvalidUserCredentialsException::new);
+
+
     }
 
 

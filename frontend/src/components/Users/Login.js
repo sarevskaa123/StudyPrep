@@ -1,11 +1,12 @@
 import React from 'react';
 import {useNavigate} from 'react-router-dom';
+import StudyPrepService from "../../repository/StudyPrepRepository";
 
 const Login = (props) => {
 
     const history = useNavigate();
     const [formData, updateFormData] = React.useState({
-        email: "",
+        username: "",
         password: ""
     })
 
@@ -18,11 +19,20 @@ const Login = (props) => {
 
     const onFormSubmit = (e) => {
         e.preventDefault();
-        const email = formData.email;
-        const password = formData.password;
-
-        props.onLogin(email,password);
-        history("/");
+        // const username = formData.username;
+        // const password = formData.password;
+        //
+        // props.onLogin()
+        // history("admin")
+        StudyPrepService.login(formData.username, formData.password).then(resp => {
+            console.log(resp.data)
+            localStorage.setItem("UserId", resp.data.userId);
+            localStorage.setItem("Username", resp.data.username);
+            localStorage.setItem("Email", resp.data.email);
+            localStorage.setItem("Userrole", resp.data.userRole);
+            props.onLogin()
+            history("/quizzes");
+        })
     }
 
     return (
@@ -30,12 +40,12 @@ const Login = (props) => {
             <div className="col-md-5">
                 <form onSubmit={onFormSubmit}>
                     <div className="form-group">
-                        <label htmlFor="name">Email</label>
+                        <label htmlFor="name">Username</label>
                         <input type="text"
                                className="form-control"
-                               name="email"
+                               name="username"
                                required
-                               placeholder="Enter email"
+                               placeholder="Enter username"
                                onChange={handleChange}
                         />
                     </div>

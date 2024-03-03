@@ -22,7 +22,7 @@ const QuizAdd = (props) => {
         const quizTitle = formData.quizTitle;
         const quizDescription = formData.quizDescription;
         const subject = formData.subject;
-        const userId = props.user.userId;
+        const userId = localStorage.getItem("UserId");
 
         props.onAddQuiz(userId,quizTitle,quizDescription,subject);
         history("/admin");

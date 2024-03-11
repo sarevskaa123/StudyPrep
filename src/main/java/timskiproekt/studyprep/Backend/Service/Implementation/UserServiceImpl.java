@@ -1,16 +1,11 @@
 package timskiproekt.studyprep.Backend.Service.Implementation;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import timskiproekt.studyprep.Backend.Model.DTO.LoginDTO;
 import timskiproekt.studyprep.Backend.Model.DTO.RegisterDTO;
-import timskiproekt.studyprep.Backend.Model.Enum.Role;
-import timskiproekt.studyprep.Backend.Model.Response.LoginMessage;
-import timskiproekt.studyprep.Backend.Model.User;
+import timskiproekt.studyprep.Backend.Model.entities.User;
 import timskiproekt.studyprep.Backend.Model.exceptions.InvalidUsernameOrPasswordException;
 import timskiproekt.studyprep.Backend.Model.exceptions.PasswordsDoNotMatchException;
 import timskiproekt.studyprep.Backend.Model.exceptions.UsernameAlreadyExistsException;

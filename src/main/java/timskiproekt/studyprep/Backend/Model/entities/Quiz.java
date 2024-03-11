@@ -1,14 +1,12 @@
-package timskiproekt.studyprep.Backend.Model;
+package timskiproekt.studyprep.Backend.Model.entities;
 
 import javax.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Optional;
 
 @Data
 @Entity

@@ -1,8 +1,8 @@
 package timskiproekt.studyprep.Backend.Model.DTO;
 
 import lombok.Data;
-import timskiproekt.studyprep.Backend.Model.Enum.Role;
-import timskiproekt.studyprep.Backend.Model.User;
+import timskiproekt.studyprep.Backend.Model.enums.Role;
+import timskiproekt.studyprep.Backend.Model.entities.User;
 
 
 @Data

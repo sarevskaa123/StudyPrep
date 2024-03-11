@@ -1,13 +1,13 @@
 package timskiproekt.studyprep.Backend.Service;
 
-import timskiproekt.studyprep.Backend.Model.BoolQuestion;
+import timskiproekt.studyprep.Backend.Model.entities.BoolQuestion;
 import timskiproekt.studyprep.Backend.Model.DTO.BoolQuestionDto;
 import timskiproekt.studyprep.Backend.Model.DTO.QuestionDto;
 import timskiproekt.studyprep.Backend.Model.DTO.QuestionMultipleDto;
 import timskiproekt.studyprep.Backend.Model.DTO.TextQuestionDto;
 
-import timskiproekt.studyprep.Backend.Model.Question;
-import timskiproekt.studyprep.Backend.Model.TextQuestion;
+import timskiproekt.studyprep.Backend.Model.entities.Question;
+import timskiproekt.studyprep.Backend.Model.entities.TextQuestion;
 
 import java.util.List;
 import java.util.Optional;

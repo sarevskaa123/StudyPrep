@@ -1,6 +1,6 @@
 package timskiproekt.studyprep.Backend.Service.Implementation;
 
-import timskiproekt.studyprep.Backend.Model.TextQuestion;
+import timskiproekt.studyprep.Backend.Model.entities.TextQuestion;
 import timskiproekt.studyprep.Backend.Service.TextQuestionService;
 
 import java.util.List;

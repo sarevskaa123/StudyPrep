@@ -1,12 +1,12 @@
 package timskiproekt.studyprep.Backend.Service.Implementation;
 
 import org.springframework.stereotype.Service;
-import timskiproekt.studyprep.Backend.Model.*;
 import timskiproekt.studyprep.Backend.Model.DTO.BoolQuestionDto;
 import timskiproekt.studyprep.Backend.Model.DTO.QuestionDto;
 import timskiproekt.studyprep.Backend.Model.DTO.QuestionMultipleDto;
 import timskiproekt.studyprep.Backend.Model.DTO.TextQuestionDto;
-import timskiproekt.studyprep.Backend.Model.Enum.QuestionType;
+import timskiproekt.studyprep.Backend.Model.enums.QuestionType;
+import timskiproekt.studyprep.Backend.Model.entities.*;
 import timskiproekt.studyprep.Backend.Repository.*;
 import timskiproekt.studyprep.Backend.Service.QuestionService;
 

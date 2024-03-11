@@ -1,10 +1,9 @@
 package timskiproekt.studyprep.Backend.WebController;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import timskiproekt.studyprep.Backend.Model.DTO.QuizDto;
-import timskiproekt.studyprep.Backend.Model.Quiz;
+import timskiproekt.studyprep.Backend.Model.entities.Quiz;
 import timskiproekt.studyprep.Backend.Service.QuizService;
 
 import java.util.List;

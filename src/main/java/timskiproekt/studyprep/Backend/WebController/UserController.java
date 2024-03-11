@@ -1,12 +1,8 @@
 package timskiproekt.studyprep.Backend.WebController;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import timskiproekt.studyprep.Backend.Model.DTO.LoginDTO;
-import timskiproekt.studyprep.Backend.Model.DTO.RegisterDTO;
-import timskiproekt.studyprep.Backend.Model.Response.LoginMessage;
-import timskiproekt.studyprep.Backend.Model.User;
+import timskiproekt.studyprep.Backend.Model.entities.User;
 import timskiproekt.studyprep.Backend.Service.UserService;
 
 import java.util.Optional;

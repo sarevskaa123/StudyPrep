@@ -1,7 +1,7 @@
 package timskiproekt.studyprep.Backend.Service;
 
 import timskiproekt.studyprep.Backend.Model.DTO.QuizDto;
-import timskiproekt.studyprep.Backend.Model.Quiz;
+import timskiproekt.studyprep.Backend.Model.entities.Quiz;
 
 import java.util.List;
 import java.util.Optional;

@@ -2,13 +2,12 @@ package timskiproekt.studyprep.Backend.WebController;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import timskiproekt.studyprep.Backend.Model.BoolQuestion;
+import timskiproekt.studyprep.Backend.Model.entities.BoolQuestion;
 import timskiproekt.studyprep.Backend.Model.DTO.*;
-import timskiproekt.studyprep.Backend.Model.Question;
-import timskiproekt.studyprep.Backend.Model.TextQuestion;
+import timskiproekt.studyprep.Backend.Model.entities.Question;
+import timskiproekt.studyprep.Backend.Model.entities.TextQuestion;
 import timskiproekt.studyprep.Backend.Service.QuestionService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController

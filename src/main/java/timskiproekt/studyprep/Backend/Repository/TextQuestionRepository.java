@@ -1,9 +1,8 @@
 package timskiproekt.studyprep.Backend.Repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import timskiproekt.studyprep.Backend.Model.Question;
-import timskiproekt.studyprep.Backend.Model.Quiz;
-import timskiproekt.studyprep.Backend.Model.TextQuestion;
+import timskiproekt.studyprep.Backend.Model.entities.Quiz;
+import timskiproekt.studyprep.Backend.Model.entities.TextQuestion;
 
 import java.util.List;
 import java.util.Optional;

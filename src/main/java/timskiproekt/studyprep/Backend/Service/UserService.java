@@ -1,11 +1,8 @@
 package timskiproekt.studyprep.Backend.Service;
 
 import org.springframework.security.core.userdetails.UserDetailsService;
-import timskiproekt.studyprep.Backend.Model.DTO.LoginDTO;
 import timskiproekt.studyprep.Backend.Model.DTO.RegisterDTO;
-import timskiproekt.studyprep.Backend.Model.Enum.Role;
-import timskiproekt.studyprep.Backend.Model.Response.LoginMessage;
-import timskiproekt.studyprep.Backend.Model.User;
+import timskiproekt.studyprep.Backend.Model.entities.User;
 
 import java.util.Optional;
 

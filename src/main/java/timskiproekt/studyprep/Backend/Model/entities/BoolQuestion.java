@@ -1,4 +1,4 @@
-package timskiproekt.studyprep.Backend.Model;
+package timskiproekt.studyprep.Backend.Model.entities;
 
 
 import javax.persistence.*;

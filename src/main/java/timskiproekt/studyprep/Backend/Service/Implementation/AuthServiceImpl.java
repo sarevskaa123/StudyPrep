@@ -2,14 +2,11 @@ package timskiproekt.studyprep.Backend.Service.Implementation;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import timskiproekt.studyprep.Backend.Model.User;
+import timskiproekt.studyprep.Backend.Model.entities.User;
 import timskiproekt.studyprep.Backend.Model.exceptions.InvalidArgumentsException;
 import timskiproekt.studyprep.Backend.Model.exceptions.InvalidUserCredentialsException;
 import timskiproekt.studyprep.Backend.Repository.UserRepository;
 import timskiproekt.studyprep.Backend.Service.AuthService;
-
-import java.util.Objects;
-import java.util.Optional;
 
 @Service
 public class AuthServiceImpl implements AuthService {

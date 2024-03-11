@@ -1,7 +1,7 @@
 package timskiproekt.studyprep.Backend.Service.Implementation;
 
 import org.springframework.stereotype.Service;
-import timskiproekt.studyprep.Backend.Model.Subject;
+import timskiproekt.studyprep.Backend.Model.entities.Subject;
 import timskiproekt.studyprep.Backend.Repository.SubjectRepository;
 import timskiproekt.studyprep.Backend.Service.SubjectService;
 

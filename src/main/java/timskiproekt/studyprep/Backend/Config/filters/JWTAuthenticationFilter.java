@@ -15,7 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import timskiproekt.studyprep.Backend.Config.JWTAuthConstants;
 import timskiproekt.studyprep.Backend.Model.DTO.UserDetailsDto;
-import timskiproekt.studyprep.Backend.Model.User;
+import timskiproekt.studyprep.Backend.Model.entities.User;
 import timskiproekt.studyprep.Backend.Model.exceptions.PasswordsDoNotMatchException;
 
 import javax.servlet.FilterChain;

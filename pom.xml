@@ -17,6 +17,7 @@
         <java.version>17</java.version>
     </properties>
     <dependencies>
+<!--SPRING BOOT-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -30,16 +31,19 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+<!---->
 
-        <dependency>
-            <groupId>org.thymeleaf.extras</groupId>
-            <artifactId>thymeleaf-extras-springsecurity5</artifactId>
-        </dependency>
-
+<!--DB-->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+<!--        -->
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -51,6 +55,8 @@
             <artifactId>jaxb-api</artifactId>
             <version>2.3.0</version>
         </dependency>
+
+<!--TEST-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -62,11 +68,14 @@
             <version>RELEASE</version>
             <scope>compile</scope>
         </dependency>
+<!--        -->
+<!--AUTH-->
         <dependency>
             <groupId>com.auth0</groupId>
             <artifactId>java-jwt</artifactId>
             <version>3.7.0</version>
         </dependency>
+<!--        -->
 
     </dependencies>
 

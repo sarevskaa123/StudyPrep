@@ -1,4 +1,4 @@
-package timskiproekt.studyprep.Backend.Model.Enum;
+package timskiproekt.studyprep.Backend.Model.enums;
 
 import org.springframework.security.core.GrantedAuthority;
 

@@ -2,9 +2,9 @@ package timskiproekt.studyprep.Backend.Service.Implementation;
 
 import org.springframework.stereotype.Service;
 import timskiproekt.studyprep.Backend.Model.DTO.QuizDto;
-import timskiproekt.studyprep.Backend.Model.Quiz;
-import timskiproekt.studyprep.Backend.Model.Subject;
-import timskiproekt.studyprep.Backend.Model.User;
+import timskiproekt.studyprep.Backend.Model.entities.Quiz;
+import timskiproekt.studyprep.Backend.Model.entities.Subject;
+import timskiproekt.studyprep.Backend.Model.entities.User;
 import timskiproekt.studyprep.Backend.Model.exceptions.QuizNotFoundException;
 import timskiproekt.studyprep.Backend.Model.exceptions.SubjectNotFound;
 import timskiproekt.studyprep.Backend.Repository.QuizRepository;

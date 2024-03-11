@@ -1,10 +1,9 @@
-package timskiproekt.studyprep.Backend.Model;
+package timskiproekt.studyprep.Backend.Model.entities;
 
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import timskiproekt.studyprep.Backend.Model.Enum.Role;
-import timskiproekt.studyprep.Backend.Service.UserService;
+import timskiproekt.studyprep.Backend.Model.enums.Role;
 
 import javax.persistence.*;
 import javax.persistence.GenerationType;
@@ -13,7 +12,6 @@ import javax.persistence.Table;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
 
 @Data
 @Entity

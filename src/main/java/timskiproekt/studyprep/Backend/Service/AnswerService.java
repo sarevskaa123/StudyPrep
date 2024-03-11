@@ -1,7 +1,6 @@
 package timskiproekt.studyprep.Backend.Service;
 
-import timskiproekt.studyprep.Backend.Model.Answer;
-import timskiproekt.studyprep.Backend.Model.Question;
+import timskiproekt.studyprep.Backend.Model.entities.Answer;
 
 import java.util.List;
 

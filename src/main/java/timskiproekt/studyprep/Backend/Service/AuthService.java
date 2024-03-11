@@ -1,9 +1,6 @@
 package timskiproekt.studyprep.Backend.Service;
 
-import timskiproekt.studyprep.Backend.Model.DTO.LoginDTO;
-import timskiproekt.studyprep.Backend.Model.User;
-
-import java.util.Optional;
+import timskiproekt.studyprep.Backend.Model.entities.User;
 
 public interface AuthService {
     User login(String username, String password);

@@ -1,12 +1,10 @@
-package timskiproekt.studyprep.Backend.Model;
+package timskiproekt.studyprep.Backend.Model.entities;
 
 import javax.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import timskiproekt.studyprep.Backend.Model.Enum.QuestionType;
-import timskiproekt.studyprep.Backend.Model.Enum.QuestionType;
-import timskiproekt.studyprep.Backend.Model.Enum.Role;
+import timskiproekt.studyprep.Backend.Model.enums.QuestionType;
 
 @Data
 @Entity

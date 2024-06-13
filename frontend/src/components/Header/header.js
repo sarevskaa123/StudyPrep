@@ -1,30 +1,38 @@
+// src/components/Header/Header.js
 import React from 'react';
-import {Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
-const header = (props) => {
-
-    let authenticate
+const Header = (props) => {
+    let authenticate;
     if (localStorage.getItem("Username")) {
-        authenticate = (<div>
-            <Link className="btn btn-outline-info my-2 my-sm-0" to={"/profile"}>Profile</Link>
-            <button className="btn btn-outline-info my-2 my-sm-0"
-                    onClick={() => {localStorage.removeItem("Username"); localStorage.removeItem("Email");
-                        localStorage.removeItem("Userrole")}}>Logout
-            </button>
-        </div>);
+        authenticate = (
+            <div>
+                <Link className="btn btn-outline-info my-2 my-sm-0" to="/profile">Profile</Link>
+                <button className="btn btn-outline-info my-2 my-sm-0" onClick={() => {
+                    localStorage.removeItem("Username");
+                    localStorage.removeItem("Email");
+                    localStorage.removeItem("Userrole");
+                    window.location.reload();
+                }}>Logout
+                </button>
+            </div>
+        );
     } else {
-        authenticate =
-            (<div><Link className="btn btn-outline-info my-2 my-sm-0" to={"/login"}>Login</Link>
-                <Link className="btn btn-outline-info my-2 my-sm-0" to={"/register"}>Register</Link></div>);
+        authenticate = (
+            <div>
+                <Link className="btn btn-outline-info my-2 my-sm-0" to="/login">Login</Link>
+                <Link className="btn btn-outline-info my-2 my-sm-0" to="/register">Register</Link>
+            </div>
+        );
     }
 
-    let admin
+    let admin;
     if (localStorage.getItem("Userrole") === "ADMIN") {
-        admin= (
-        <li className="nav-item active">
-            <Link className={"nav-link"} to={"/admin"}>Admin</Link>
-        </li>
-        )
+        admin = (
+            <li className="nav-item active">
+                <Link className="nav-link" to="/admin">Admin</Link>
+            </li>
+        );
     }
 
     return (
@@ -37,21 +45,19 @@ const header = (props) => {
                 </button>
                 <div className="collapse navbar-collapse" id="navbarCollapse">
                     <ul className="navbar-nav mr-auto">
-                        <li className="nav-item active">
-                            <Link className="nav-link" to={"/quizzes"}>Quizzes</Link>
+                        <li className="nav-item">
+                            <Link className="nav-link" to="/subjects">Subjects</Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link className="nav-link" to="/quizzes">Quizzes</Link>
                         </li>
                         {admin}
-                        {/*<li className="nav-item active">*/}
-                        {/*    <Link className={"nav-link"} to={"/admin"}>Admin</Link>*/}
-                        {/*</li>*/}
                     </ul>
                     {authenticate}
-                    {/*<button className="btn btn-outline-info my-2 my-sm-0">Logout</button>*/}
-                    {/*<Link className="btn btn-outline-info my-2 my-sm-0" to={"/login"}>Login</Link>*/}
                 </div>
             </nav>
         </header>
-    )
+    );
 }
 
-export default header;
+export default Header;

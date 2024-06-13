@@ -19,4 +19,9 @@ public class QuizDto {
         this.quizDescription = quizDescription;
         this.subject = subject;
     }
+
+    public String getQuizName(){
+        return quizTitle;
+    }
+
 }

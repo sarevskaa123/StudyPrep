@@ -6,9 +6,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import timskiproekt.studyprep.Backend.Model.enums.Role;
 
 import javax.persistence.*;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -20,12 +17,17 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int userId;
+
     @Column(unique = true)
     private String username;
+
     @Column(unique = true)
     private String email;
+
     private String password;
+
     private Timestamp registerDate;
+
     @Enumerated(value = EnumType.STRING)
     private Role userRole;
 
@@ -33,7 +35,6 @@ public class User implements UserDetails {
     private boolean isAccountNonLocked = true;
     private boolean isCredentialsNonExpired = true;
     private boolean isEnabled = true;
-
 
     public User(String username, String email, String password) {
         this.username = username;
@@ -44,31 +45,32 @@ public class User implements UserDetails {
     }
 
     public User() {
-
+        // Default constructor
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        // You should return the authorities based on userRole
+        return null; // Update this to return the correct authorities
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return isAccountNonExpired;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return isAccountNonLocked;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return isCredentialsNonExpired;
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return isEnabled;
     }
 }

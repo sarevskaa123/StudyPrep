@@ -7,6 +7,7 @@ import timskiproekt.studyprep.Backend.Model.entities.Subject;
 import timskiproekt.studyprep.Backend.Model.entities.User;
 import timskiproekt.studyprep.Backend.Model.exceptions.QuizNotFoundException;
 import timskiproekt.studyprep.Backend.Model.exceptions.SubjectNotFound;
+import timskiproekt.studyprep.Backend.Model.exceptions.UserNotFoundException;
 import timskiproekt.studyprep.Backend.Repository.QuizRepository;
 import timskiproekt.studyprep.Backend.Repository.SubjectRepository;
 import timskiproekt.studyprep.Backend.Repository.UserRepository;
@@ -45,12 +46,15 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     @Transactional
-    public Optional<Quiz> save(String quizTitle, String quizDescription, int subjectId) {
+    public Optional<Quiz> save(String quizTitle, String quizDescription, int subjectId, int userId) {
         Subject subject = this.subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new SubjectNotFound(subjectId));
 
+        User user = this.userRepository.findByUserId(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
         this.quizRepository.deleteByQuizTitle(quizTitle);
-        Quiz quiz = new Quiz(quizTitle, quizDescription, subject,null);
+        Quiz quiz = new Quiz(quizTitle, quizDescription, subject, user);
 
         this.quizRepository.save(quiz);
 
@@ -105,5 +109,18 @@ public class QuizServiceImpl implements QuizService {
         this.quizRepository.save(quiz);
         return Optional.of(quiz);
 
+    }
+
+    @Override
+    public List<Quiz> findBySubjectId(int subjectId) {
+        Subject subject = this.subjectRepository.findById(subjectId)
+                .orElseThrow(() -> new SubjectNotFound(subjectId));
+
+        return quizRepository.findBySubjectId(subject);
+    }
+
+    @Override
+    public Optional<Quiz> addQuizToSubject(int subjectId, QuizDto quizDto) {
+        return save(quizDto.getQuizTitle(), quizDto.getQuizDescription(), subjectId, quizDto.getUserId());
     }
 }

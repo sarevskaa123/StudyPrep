@@ -1,9 +1,11 @@
-import React, {Component} from "react";
-import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
+import React, { Component } from "react";
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Header from "../Header/header";
 import QuizAdd from "../Quiz/QuizAdd";
 import QuizEdit from "../Quiz/QuizEdit";
 import Quizzes from "../Quiz/quizzes";
+import Subject from '../Subject/Subject';
+import SubjectDetail from '../Subject/SubjectDetail';
 import Register from "../Users/Register";
 import Login from "../Users/Login";
 import StudyPrepService from "../../repository/StudyPrepRepository";
@@ -13,10 +15,9 @@ import QuestionMultipleCreate from "../Question/QuestionMultipleCreate";
 import QuestionBoolCreate from "../Question/QuestionBoolCreate";
 import QuestionTextCreate from "../Question/QuestionTextCreate";
 import QuestionsList from "../Question/QuestionsList";
-
+import axios from "../../custom-axios/axios";
 
 class App extends Component {
-
     constructor(props) {
         super(props);
         this.state = {
@@ -28,12 +29,59 @@ class App extends Component {
         }
     }
 
+    fetchSubjectDetails = async (subjectId) => {
+        try {
+            const response = await fetch(`/api/subjects/${subjectId}`);
+            const text = await response.text();
+            console.log("fetchSubjectDetails response text:", text); // Log response text
+            if (!response.ok) {
+                throw new Error(`Error: ${response.statusText}`);
+            }
+            return JSON.parse(text);
+        } catch (error) {
+            console.error("Failed to fetch subject details:", error);
+            throw error;
+        }
+    };
+
+    // fetchQuizzes = async (subjectId) => {
+    //     try {
+    //         const response = await fetch(`/api/quizzes/${subjectId}/quizzes`);
+    //         const text = await response.text();
+    //         console.log("fetchQuizzes response text:", text); // Log response text
+    //         if (!response.ok) {
+    //             throw new Error(`Error: ${response.statusText}`);
+    //         }
+    //         return JSON.parse(text);
+    //     } catch (error) {
+    //         console.error("Failed to fetch quizzes:", error);
+    //         throw error;
+    //     }
+    // };
+
+    addQuizToSubject = async (subjectId, quizData) => {
+        try {
+            const endpoint = `/quizzes/${subjectId}/add`;
+            console.log("addQuizToSubject endpoint:", endpoint); // Log the endpoint
+            const response = await axios.post(endpoint, {
+                quizTitle: quizData
+            });
+            const text = await response.text();
+            console.log("addQuizToSubject response text:", text); // Log response text
+            if (!response.ok) {
+                throw new Error(`Error: ${response.statusText}`);
+            }
+            return JSON.parse(text);
+        } catch (error) {
+            console.error("Failed to add quiz to subject:", error);
+            throw error;
+        }
+    };
+
     render() {
         return (
             <Router>
-                <Header user={this.state.user}
-                        // onDelete={this.logout}
-                />
+                <Header user={this.state.user} />
                 <main>
                     <div className={"container"}>
                         <Routes>
@@ -59,7 +107,7 @@ class App extends Component {
                             <Route path={"/question/addSingle/:id"}
                                    element={<QuestionSingleCreate onQuestionSingleCreate={this.questionSingleCreate}
                                                                   quiz={this.state.selectedQuiz}
-                                   user={this.state.user}/>}/>
+                                                                  user={this.state.user}/>}/>
                             <Route path={"/question/addMultiple/:id"}
                                    element={<QuestionMultipleCreate
                                        onQuestionMultipleCreate={this.questionMultipleCreate}
@@ -74,7 +122,14 @@ class App extends Component {
                                                                 user={this.state.user}
                                                                 quiz={this.state.selectedQuiz}/>}/>
                             <Route path={"/profile"}/>
-                            <Route path={"/quizzes"}/>
+                            <Route path="/subjects" element={<Subject />} />
+                            <Route path="/subjects/:subjectId" element={
+                                <SubjectDetail
+                                    fetchSubjectDetails={this.fetchSubjectDetails}
+                                    fetchQuizzes={this.fetchQuizzes}
+                                />
+                            } />
+                            <Route path="/quizzes" element={<Quizzes />} />
                             <Route path={"/login"} element={<Login onLogin={this.fetchData}/>}/>
                             <Route path={"/register"} element={<Register onRegister={this.fetchData}/>}/>
                             <Route path={"/"} element={<Home user={this.state.user}/>}/>
@@ -82,8 +137,6 @@ class App extends Component {
                     </div>
                 </main>
             </Router>
-
-
         );
     }
 
@@ -144,33 +197,12 @@ class App extends Component {
         })
     }
 
-
     editQuiz = (id, quizTitle, quizDescription, subject) => {
         StudyPrepService.editQuiz(id, quizTitle, quizDescription, subject)
             .then(() => {
                 this.loadQuizzes();
             })
-
-
     }
-    // register = (username,email,password,repeatPassword)=>{
-    //     StudyPrepService.register(username,email,password,repeatPassword).then()
-    // }
-
-    // login = (username, password) => {
-    //     StudyPrepService.login(username, password)
-    //         .then(resp => {
-    //             this.setState({
-    //                 user: resp.data
-    //             })
-    //         })
-    // }
-
-    // logout = () => {
-    //     this.setState({
-    //         user: null
-    //     })
-    // }
 
     questionSingleCreate = (questionText, quizId, answer1, answer2, answer3, answer4, answerCorrect) => {
         StudyPrepService.createSingleQuestion(questionText, quizId, answer1, answer2, answer3, answer4, answerCorrect)
@@ -200,12 +232,10 @@ class App extends Component {
             })
     }
 
-
     fetchData = () => {
         this.loadQuizzes();
         this.loadSubjects();
     }
-
 
     componentDidMount() {
         this.fetchData();

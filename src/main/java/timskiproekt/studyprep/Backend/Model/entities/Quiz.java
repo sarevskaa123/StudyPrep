@@ -36,4 +36,16 @@ public class Quiz {
     public Quiz() {
 
     }
+
+    public void setQuizName(String name){
+        this.quizTitle=name;
+    }
+
+    public void setSubject(Subject subjectId){
+        this.subjectId = subjectId;
+    }
+
+    public void setUser(User user) {
+        this.userId = user;
+    }
 }

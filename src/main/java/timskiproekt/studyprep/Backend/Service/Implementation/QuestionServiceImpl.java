@@ -2,16 +2,14 @@ package timskiproekt.studyprep.Backend.Service.Implementation;
 
 import org.springframework.stereotype.Service;
 import timskiproekt.studyprep.Backend.Model.DTO.BoolQuestionDto;
-import timskiproekt.studyprep.Backend.Model.DTO.QuestionDto;
-import timskiproekt.studyprep.Backend.Model.DTO.QuestionMultipleDto;
+import timskiproekt.studyprep.Backend.Model.DTO.MultipleChoiceQuestionDto;
+import timskiproekt.studyprep.Backend.Model.DTO.SingleChoiceQuestionDto;
 import timskiproekt.studyprep.Backend.Model.DTO.TextQuestionDto;
-import timskiproekt.studyprep.Backend.Model.enums.QuestionType;
 import timskiproekt.studyprep.Backend.Model.entities.*;
-import timskiproekt.studyprep.Backend.Repository.*;
+import timskiproekt.studyprep.Backend.Repository.QuestionRepository;
+import timskiproekt.studyprep.Backend.Repository.QuizRepository;
 import timskiproekt.studyprep.Backend.Service.QuestionService;
 
-import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,126 +18,157 @@ public class QuestionServiceImpl implements QuestionService {
 
     private final QuizRepository quizRepository;
     private final QuestionRepository questionRepository;
-    private final AnswerRepository answerRepository;
-    private final BoolQuestionRepository boolQuestionRepository;
-    private final TextQuestionRepository textQuestionRepository;
 
-    public QuestionServiceImpl(QuizRepository quizRepository, QuestionRepository questionRepository, AnswerRepository answerRepository, BoolQuestionRepository boolQuestionRepository, TextQuestionRepository textQuestionRepository) {
+
+    public QuestionServiceImpl(QuizRepository quizRepository, QuestionRepository questionRepository) {
         this.quizRepository = quizRepository;
         this.questionRepository = questionRepository;
-        this.answerRepository = answerRepository;
-        this.boolQuestionRepository = boolQuestionRepository;
-        this.textQuestionRepository = textQuestionRepository;
+
+    }
+
+    @Override
+    public Optional<Question> addSingleQuestion(SingleChoiceQuestionDto questionDto) {
+        Quiz quiz = quizRepository.findById(questionDto.quizId())
+                .orElseThrow(() -> new RuntimeException("Quiz not found"));
+        SingleChoiceQuestion question = new SingleChoiceQuestion(
+                questionDto.questionText(),
+                questionDto.answerOptions().get(0),
+                questionDto.answerOptions().get(1),
+                questionDto.answerOptions().get(2),
+                questionDto.answerOptions().get(3),
+                questionDto.correctAnswer(),
+                quiz
+        );
+
+        return Optional.of(questionRepository.save(question));
     }
 
 
     @Override
-    public Optional<Question> addSinlgeQuestion(QuestionDto questionDto) {
-        Quiz quiz = quizRepository.findById(questionDto.getQuizId()).orElseThrow(RuntimeException::new);
+    public Optional<Question> addMultipleQuestion(MultipleChoiceQuestionDto questionDto) {
+        Quiz quiz = quizRepository.findById(questionDto.quizId())
+                .orElseThrow(() -> new RuntimeException("Quiz not found"));
+        Question question = new MultipleChoiceQuestion(
+                questionDto.questionText(),
+                questionDto.answerOptions().get(0),
+                questionDto.answerOptions().get(1),
+                questionDto.answerOptions().get(2),
+                questionDto.answerOptions().get(3),
+                questionDto.isCorrect().get(0),
+                questionDto.isCorrect().get(1),
+                questionDto.isCorrect().get(2),
+                questionDto.isCorrect().get(3),
+                quiz
+        );
+        return Optional.of(questionRepository.save(question));
+    }
 
-        String answer1 = questionDto.getAnswer1();
-        String answer2 = questionDto.getAnswer2();
-        String answer3 = questionDto.getAnswer3();
-        String answer4 = questionDto.getAnswer4();
-        int answerCorrect = questionDto.getAnswerCorrect();
+    @Override
+    public Optional<Question> addBoolQuestion(BoolQuestionDto questionDto) {
+        Quiz quiz = quizRepository.findById(questionDto.quizId())
+                .orElseThrow(() -> new RuntimeException("Quiz not found"));
+        BoolQuestion question = new BoolQuestion(
+                questionDto.questionText(),
+                questionDto.correctAnswer(),
+                quiz
+        );
+        return Optional.of(questionRepository.save(question));
+    }
 
-        Question question = new Question(questionDto.getQuestionText(), quiz, QuestionType.SINGLE);
-        questionRepository.save(question);
+    @Override
+    public Optional<Question> addTextQuestion(TextQuestionDto questionDto) {
+        Quiz quiz = quizRepository.findById(questionDto.quizId())
+                .orElseThrow(() -> new RuntimeException("Quiz not found"));
+        TextQuestion question = new TextQuestion(
+                questionDto.questionText(),
+                questionDto.correctAnswer(),
+                quiz
+        );
+        return Optional.of(questionRepository.save(question));
+    }
 
-        Answer ans1 = new Answer(answer1, Boolean.FALSE, question);
-        Answer ans2 = new Answer(answer2, Boolean.FALSE, question);
-        Answer ans3 = new Answer(answer3, Boolean.FALSE, question);
-        Answer ans4 = new Answer(answer4, Boolean.FALSE, question);
+    @Override
+    public Question editSingleQuestion(SingleChoiceQuestionDto questionDto) {
+        Question question = questionRepository.findById(questionDto.questionId()).orElseThrow(
+                () -> new RuntimeException("Question not found")
+        );
 
-        if (answerCorrect == 1) {
-            ans1.setIsCorrect(Boolean.TRUE);
-        } else if (answerCorrect == 2) {
-            ans2.setIsCorrect(Boolean.TRUE);
-        } else if (answerCorrect == 3) {
-            ans3.setIsCorrect(Boolean.TRUE);
-        } else {
-            ans4.setIsCorrect(Boolean.TRUE);
+        if (question instanceof SingleChoiceQuestion singleChoiceQuestion) {
+            singleChoiceQuestion.setQuestionText(questionDto.questionText());
+            singleChoiceQuestion.setAnswerOption1(questionDto.answerOptions().get(0));
+            singleChoiceQuestion.setAnswerOption2(questionDto.answerOptions().get(1));
+            singleChoiceQuestion.setAnswerOption3(questionDto.answerOptions().get(2));
+            singleChoiceQuestion.setAnswerOption4(questionDto.answerOptions().get(3));
+            singleChoiceQuestion.setCorrectAnswer(questionDto.correctAnswer());
+
+            questionRepository.save(singleChoiceQuestion);
+
+            return singleChoiceQuestion;
         }
 
-        answerRepository.save(ans1);
-        answerRepository.save(ans2);
-        answerRepository.save(ans3);
-        answerRepository.save(ans4);
+        throw new RuntimeException("Question type not found");
 
-
-        return Optional.of(question);
     }
 
     @Override
-    public Optional<Question> addMultipleQuestion(QuestionMultipleDto questionDto) {
-        Quiz quiz = quizRepository.findById(questionDto.getQuizId()).orElseThrow(RuntimeException::new);
+    public Question editMultipleQuestion(MultipleChoiceQuestionDto questionDto) {
+        Question question = questionRepository.findById(questionDto.questionId()).orElseThrow(
+                () -> new RuntimeException("Question not found")
+        );
 
-        String answer1 = questionDto.getAnswer1();
-        String answer2 = questionDto.getAnswer2();
-        String answer3 = questionDto.getAnswer3();
-        String answer4 = questionDto.getAnswer4();
-        Boolean checked1 = questionDto.getChecked1();
-        Boolean checked2 = questionDto.getChecked2();
-        Boolean checked3 = questionDto.getChecked3();
-        Boolean checked4 = questionDto.getChecked4();
+        if (question instanceof MultipleChoiceQuestion multipleChoiceQuestion) {
+            multipleChoiceQuestion.setQuestionText(questionDto.questionText());
+            multipleChoiceQuestion.setAnswerOption1(questionDto.answerOptions().get(0));
+            multipleChoiceQuestion.setAnswerOption2(questionDto.answerOptions().get(1));
+            multipleChoiceQuestion.setAnswerOption3(questionDto.answerOptions().get(2));
+            multipleChoiceQuestion.setAnswerOption4(questionDto.answerOptions().get(3));
+            multipleChoiceQuestion.setCorrect1(questionDto.isCorrect().get(0));
+            multipleChoiceQuestion.setCorrect2(questionDto.isCorrect().get(1));
+            multipleChoiceQuestion.setCorrect3(questionDto.isCorrect().get(2));
+            multipleChoiceQuestion.setCorrect4(questionDto.isCorrect().get(3));
 
+            questionRepository.save(multipleChoiceQuestion);
 
-        Question question = new Question(questionDto.getQuestionText(), quiz, QuestionType.MULTIPLE);
-        questionRepository.save(question);
-
-        Answer ans1 = new Answer(answer1, checked1, question);
-        Answer ans2 = new Answer(answer2, checked2, question);
-        Answer ans3 = new Answer(answer3, checked3, question);
-        Answer ans4 = new Answer(answer4, checked4, question);
-
-
-        answerRepository.save(ans1);
-        answerRepository.save(ans2);
-        answerRepository.save(ans3);
-        answerRepository.save(ans4);
-
-        return Optional.of(question);
-    }
-
-    @Override
-    public List<Question> findAllSingleByQuiz(int id) {
-        Quiz quiz = quizRepository.findById(id).orElseThrow(RuntimeException::new);
-        return questionRepository.findAllByQuizAndQuestionType(quiz, QuestionType.SINGLE);
-    }
-
-    @Override
-    public List<Question> findAllMultipleByQuiz(int id) {
-        Quiz quiz = quizRepository.findById(id).orElseThrow(RuntimeException::new);
-        return questionRepository.findAllByQuizAndQuestionType(quiz, QuestionType.MULTIPLE);
-    }
-
-    @Override
-    public void deleteById(int id) {
-        questionRepository.deleteById(id);
-    }
-
-    @Override
-    public void deleteByIdBool(int id) {
-        boolQuestionRepository.deleteById(id);
-    }
-
-    @Override
-    public void deleteByIdText(int id) {
-        textQuestionRepository.deleteById(id);
-    }
-
-    @Override
-    @Transactional
-    public void deleteByQuestionText(String questionText) {
-        if(questionRepository.findByQuestionText(questionText).isPresent()){
-            questionRepository.deleteByQuestionText(questionText);
+            return multipleChoiceQuestion;
         }
-        if(boolQuestionRepository.findByBoolQuestionText(questionText).isPresent()){
-            boolQuestionRepository.deleteByBoolQuestionText(questionText);
+
+        throw new RuntimeException("Question type not found");
+    }
+
+    @Override
+    public Question editBoolQuestion(BoolQuestionDto questionDto) {
+        Question question = questionRepository.findById(questionDto.questionId()).orElseThrow(
+                () -> new RuntimeException("Question not found")
+        );
+
+        if (question instanceof BoolQuestion boolQuestion) {
+            boolQuestion.setQuestionText(questionDto.questionText());
+            boolQuestion.setCorrectAnswer(questionDto.correctAnswer());
+
+            questionRepository.save(boolQuestion);
+
+            return boolQuestion;
         }
-        if(textQuestionRepository.findByQuestion(questionText).isPresent()){
-            textQuestionRepository.deleteByQuestion(questionText);
+
+        throw new RuntimeException("Question type not found");
+    }
+
+    @Override
+    public Question editTextQuestion(TextQuestionDto questionDto) {
+        Question question = questionRepository.findById(questionDto.questionId()).orElseThrow(
+                () -> new RuntimeException("Question not found")
+        );
+
+        if (question instanceof TextQuestion textQuestion) {
+            textQuestion.setQuestionText(questionDto.questionText());
+            textQuestion.setCorrectAnswer(questionDto.correctAnswer());
+
+            questionRepository.save(textQuestion);
+
+            return textQuestion;
         }
+
+        throw new RuntimeException("Question type not found");
     }
 
     @Override
@@ -153,73 +182,21 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public Optional<Question> findByQuestionText(String questionText) {
-        return questionRepository.findByQuestionText(questionText);
+    public List<Question> findAllQuestionsByQuiz(int quizId) {
+        return questionRepository.findAllByQuizQuizId(quizId);
     }
 
     @Override
-    public Optional<BoolQuestion> findByQuestionTextBool(String questionText) {
-        return boolQuestionRepository.findByBoolQuestionText(questionText);
+    public Optional<Question> findQuestionById(int questionId) {
+        return questionRepository.findById(questionId);
     }
 
-    @Override
-    public Optional<TextQuestion> findByQuestionTextText(String questionText) {
-        return textQuestionRepository.findByQuestion(questionText);
-    }
 
     @Override
-    public Optional<BoolQuestion> addBoolQuestion(BoolQuestionDto boolQuestionDto) {
-        Quiz quiz = quizRepository.findById(boolQuestionDto.getQuizId()).orElseThrow(RuntimeException::new);
-
-        BoolQuestion boolQuestion = new BoolQuestion(boolQuestionDto.getQuestionText(),boolQuestionDto.getIsCorrect(),quiz);
-
-        boolQuestionRepository.save(boolQuestion);
-        return Optional.of(boolQuestion);
-    }
-
-    @Override
-    public List<BoolQuestion> findAllBoolByQuiz(int id) {
-        Quiz quiz = quizRepository.findById(id).orElseThrow(RuntimeException::new);
-        return boolQuestionRepository.findByQuiz(quiz);
-    }
-
-    @Override
-    public Optional<TextQuestion> addTextQuestion(TextQuestionDto textQuestionDto) {
-        Quiz quiz = quizRepository.findById(textQuestionDto.getQuizId()).orElseThrow(RuntimeException::new);
-
-        TextQuestion textQuestion = new TextQuestion(textQuestionDto.getQuestionText(),textQuestionDto.getAnswerText(),quiz);
-
-        textQuestionRepository.save(textQuestion);
-        return Optional.of(textQuestion);
-    }
-
-    @Override
-    public List<TextQuestion> findAllTextByQuiz(int id) {
-        Quiz quiz = quizRepository.findById(id).orElseThrow(RuntimeException::new);
-        return textQuestionRepository.findByQuiz(quiz);
-
-    }
-
-    @Override
-    public List<String> findAllQuestionsByQuiz(int id) {
-        Quiz quiz = quizRepository.findById(id).orElseThrow(RuntimeException::new);
-        List<String> allQuestions = new ArrayList<>();
-
-        List<Question> questions = questionRepository.findAllByQuiz(quiz);
-        List<BoolQuestion> boolQuestions = boolQuestionRepository.findByQuiz(quiz);
-        List<TextQuestion> textQuestions = textQuestionRepository.findByQuiz(quiz);
-
-        for (Question question : questions) {
-            allQuestions.add(question.getQuestionText());
-        }
-        for (BoolQuestion question : boolQuestions) {
-            allQuestions.add(question.getBoolQuestionText());
-        }
-        for (TextQuestion question : textQuestions) {
-            allQuestions.add(question.getQuestion());
-        }
-
-
-        return allQuestions;
+    public void deleteQuestionById(int questionId) {
+        questionRepository.deleteById(questionId);
     }
 }
+
+
+

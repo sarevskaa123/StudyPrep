@@ -1,46 +1,35 @@
 package timskiproekt.studyprep.Backend.Service;
 
-import timskiproekt.studyprep.Backend.Model.entities.BoolQuestion;
-import timskiproekt.studyprep.Backend.Model.DTO.BoolQuestionDto;
-import timskiproekt.studyprep.Backend.Model.DTO.QuestionDto;
-import timskiproekt.studyprep.Backend.Model.DTO.QuestionMultipleDto;
-import timskiproekt.studyprep.Backend.Model.DTO.TextQuestionDto;
-
-import timskiproekt.studyprep.Backend.Model.entities.Question;
-import timskiproekt.studyprep.Backend.Model.entities.TextQuestion;
+import timskiproekt.studyprep.Backend.Model.DTO.*;
+import timskiproekt.studyprep.Backend.Model.entities.*;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface QuestionService {
-    Optional<Question> addSinlgeQuestion(QuestionDto questionDto);
-    Optional<Question> addMultipleQuestion(QuestionMultipleDto questionMultipleDto);
 
-    List<Question> findAllSingleByQuiz(int id);
-    List<Question> findAllMultipleByQuiz(int id);
+    Optional<Question> addSingleQuestion(SingleChoiceQuestionDto questionDto);
+    Optional<Question> addMultipleQuestion(MultipleChoiceQuestionDto questionDto);
 
-    void deleteById(int id);
-    void deleteByIdBool(int id);
-    void deleteByIdText(int id);
+    Optional<Question> addTextQuestion(TextQuestionDto questionDto);
 
-    void deleteByQuestionText(String questionText);
+    Optional<Question> addBoolQuestion(BoolQuestionDto questionDto);
+
+    Question editSingleQuestion(SingleChoiceQuestionDto questionDto);
+    Question editMultipleQuestion(MultipleChoiceQuestionDto questionDto);
+
+    Question editBoolQuestion(BoolQuestionDto questionDto);
+
+    Question editTextQuestion(TextQuestionDto questionDto);
 
     List<Question> findAll();
     Optional<Question> findById(int id);
 
-    Optional<Question> findByQuestionText(String questionText);
+    List<Question> findAllQuestionsByQuiz(int quizId);
 
-    Optional<BoolQuestion> findByQuestionTextBool(String questionText);
+    Optional<Question> findQuestionById(int questionId);
 
-    Optional<TextQuestion> findByQuestionTextText(String questionText);
+//    List<QuestionDto> getQuestionsByQuizId(int quizId);
 
-    Optional<BoolQuestion> addBoolQuestion(BoolQuestionDto boolQuestionDto);
-    List<BoolQuestion> findAllBoolByQuiz(int id);
-    Optional<TextQuestion> addTextQuestion(TextQuestionDto textQuestionDto);
-
-    List<TextQuestion> findAllTextByQuiz(int id);
-
-    List<String> findAllQuestionsByQuiz(int id);
-
-
+    void deleteQuestionById(int questionId);
 }

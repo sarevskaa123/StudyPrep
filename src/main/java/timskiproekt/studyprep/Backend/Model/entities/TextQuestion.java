@@ -1,29 +1,26 @@
 package timskiproekt.studyprep.Backend.Model.entities;
 
 
-import javax.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+import javax.persistence.Entity;
+
+@Getter
+@Setter
 @Entity
-public class TextQuestion {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int textQuestionId;
-    private String question;
-    private String answerText;
-    @ManyToOne
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "quizId")
-    private Quiz quiz;
+@AllArgsConstructor
+public class TextQuestion extends Question {
+    private String correctAnswer;
 
-    public TextQuestion(String question, String answerText, Quiz quiz) {
-        this.question = question;
-        this.answerText = answerText;
-        this.quiz = quiz;
+    public TextQuestion(String questionText, String correctAnswer, Quiz quiz) {
+        super(questionText, "Text", quiz);
+        this.correctAnswer = correctAnswer;
     }
 
-    public TextQuestion(){}
+    public TextQuestion() {
+    }
 }
+

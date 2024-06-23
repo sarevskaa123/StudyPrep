@@ -1,12 +1,12 @@
 package timskiproekt.studyprep.Backend.Model.entities;
 
-import javax.persistence.*;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.sql.Timestamp;
-import java.time.Instant;
+import javax.persistence.*;
+import java.util.List;
 
 @Data
 @Entity
@@ -16,7 +16,7 @@ public class Quiz {
     private int quizId;
     private String quizTitle;
     private String quizDescription;
-    private Timestamp quizDateCreated;
+
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "userId")
@@ -25,27 +25,18 @@ public class Quiz {
     @JoinColumn(name = "subjectId")
     private Subject subjectId;
 
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<Question> questions;
+
     public Quiz(String quizTitle, String quizDescription, Subject subject, User user) {
         this.quizTitle = quizTitle;
         this.quizDescription = quizDescription;
         this.subjectId = subject;
-        this.quizDateCreated = Timestamp.from(Instant.now());
         this.userId = user;
     }
 
     public Quiz() {
 
-    }
-
-    public void setQuizName(String name){
-        this.quizTitle=name;
-    }
-
-    public void setSubject(Subject subjectId){
-        this.subjectId = subjectId;
-    }
-
-    public void setUser(User user) {
-        this.userId = user;
     }
 }

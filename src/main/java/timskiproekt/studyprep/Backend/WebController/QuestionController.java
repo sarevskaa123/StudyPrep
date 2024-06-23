@@ -1,18 +1,17 @@
 package timskiproekt.studyprep.Backend.WebController;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import timskiproekt.studyprep.Backend.Model.entities.BoolQuestion;
 import timskiproekt.studyprep.Backend.Model.DTO.*;
-import timskiproekt.studyprep.Backend.Model.entities.Question;
-import timskiproekt.studyprep.Backend.Model.entities.TextQuestion;
+import timskiproekt.studyprep.Backend.Model.entities.*;
 import timskiproekt.studyprep.Backend.Service.QuestionService;
 
 import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
-@RequestMapping("/api/question")
+@RequestMapping("/api/questions")
 public class QuestionController {
 
     private final QuestionService questionService;
@@ -26,89 +25,72 @@ public class QuestionController {
         return questionService.findAll();
     }
 
-    @GetMapping("/allQuestions/{id}")
-    public List<String> findAllQuestionsForQuiz(@PathVariable int id) {
-        return questionService.findAllQuestionsByQuiz(id);
+    @GetMapping("/quiz/{quizId}")
+    public List<Question> findAllQuestionsForQuiz(@PathVariable int quizId) {
+        return questionService.findAllQuestionsByQuiz(quizId);
     }
 
-    @GetMapping("/multiple/{id}")
-    public List<Question> findAllMultiple(@PathVariable int id) {
-
-        return questionService.findAllMultipleByQuiz(id);
+    @GetMapping("/{questionId}")
+    public ResponseEntity<Question> findQuestionById(@PathVariable int questionId) {
+        return questionService.findQuestionById(questionId)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/bool/{id}")
-    public List<BoolQuestion> findAllBool(@PathVariable int id) {
-
-        return questionService.findAllBoolByQuiz(id);
+    @PostMapping("/{quizId}/addSingle")
+    public ResponseEntity<Question> addSingleQuestion(@RequestBody SingleChoiceQuestionDto questionDto) {
+        return this.questionService.addSingleQuestion(questionDto).map(question -> ResponseEntity.ok().body(question))
+                .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
-    @GetMapping("/text/{id}")
-    public List<TextQuestion> findAllText(@PathVariable int id) {
-
-        return questionService.findAllTextByQuiz(id);
-    }
-
-    @GetMapping("/single/{id}")
-    public List<Question> findAllSingle(@PathVariable int id) {
-        return questionService.findAllSingleByQuiz(id);
-    }
-
-    @PostMapping("/{id}/addSingle")
-    public ResponseEntity<Question> addSingleQuestion(@RequestBody QuestionDto questionDto, @PathVariable int id) {
-        return this.questionService.addSinlgeQuestion(questionDto)
+    @PostMapping("/{quizId}/addMultiple")
+    public ResponseEntity<Question> addMultipleQuestion(@RequestBody MultipleChoiceQuestionDto questionDto) {
+        return this.questionService.addMultipleQuestion(questionDto)
                 .map(question -> ResponseEntity.ok().body(question))
                 .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
-    @PostMapping("/{id}/addMultiple")
-    public ResponseEntity<Question> addMultipleQuestion(@RequestBody QuestionMultipleDto questionMultipleDto, @PathVariable int id) {
-        return this.questionService.addMultipleQuestion(questionMultipleDto)
+    @PostMapping("/{quizId}/addBool")
+    public ResponseEntity<Question> addBoolQuestion(@RequestBody BoolQuestionDto questionDto) {
+        return this.questionService.addBoolQuestion(questionDto)
                 .map(question -> ResponseEntity.ok().body(question))
                 .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
-    @PostMapping("/{id}/addBool")
-    public ResponseEntity<BoolQuestion> addBoolQuestion(@RequestBody BoolQuestionDto boolQuestionDto, @PathVariable int id) {
-        return this.questionService.addBoolQuestion(boolQuestionDto)
+    @PostMapping("/{quizId}/addText")
+    public ResponseEntity<Question> addTextQuestion(@RequestBody TextQuestionDto questionDto) {
+        return this.questionService.addTextQuestion(questionDto)
                 .map(question -> ResponseEntity.ok().body(question))
                 .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
-    @PostMapping("/{id}/addText")
-    public ResponseEntity<TextQuestion> addTextQuestion(@RequestBody TextQuestionDto textQuestionDto, @PathVariable int id) {
-        return this.questionService.addTextQuestion(textQuestionDto)
-                .map(question -> ResponseEntity.ok().body(question))
-                .orElseGet(() -> ResponseEntity.badRequest().build());
+    @DeleteMapping("/delete/{questionId}")
+    public ResponseEntity<Void> deleteQuestion(@PathVariable int questionId) {
+        questionService.deleteQuestionById(questionId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity deleteById(@PathVariable int id) {
-        this.questionService.deleteById(id);
-        if (this.questionService.findById(id).isEmpty()) return ResponseEntity.ok().build();
-        return ResponseEntity.badRequest().build();
+    @PutMapping("/{questionId}/editSingle")
+    public ResponseEntity<Question> editQuestion(@RequestBody SingleChoiceQuestionDto questionDto) {
+        Question result = this.questionService.editSingleQuestion(questionDto);
+        return ResponseEntity.ok().body(result);
     }
 
-    @DeleteMapping("/deleteQuestions/{questionText}")
-    public ResponseEntity deleteByText(@PathVariable String questionText) {
-        this.questionService.deleteByQuestionText(questionText);
-        if (this.questionService.findByQuestionText(questionText).isEmpty()) return ResponseEntity.ok().build();
-        return ResponseEntity.badRequest().build();
+    @PutMapping("/{questionId}/editMultiple")
+    public ResponseEntity<Question> editQuestion(@RequestBody MultipleChoiceQuestionDto questionDto) {
+        Question result = this.questionService.editMultipleQuestion(questionDto);
+        return ResponseEntity.ok().body(result);
     }
 
-    @DeleteMapping("/deleteBool/{id}")
-    public ResponseEntity deleteByIdBool(@PathVariable int id) {
-        this.questionService.deleteByIdBool(id);
-        if (this.questionService.findById(id).isEmpty()) return ResponseEntity.ok().build();
-        return ResponseEntity.badRequest().build();
+    @PutMapping("/{questionId}/editBool")
+    public ResponseEntity<Question> editQuestion(@RequestBody BoolQuestionDto questionDto) {
+        Question result = this.questionService.editBoolQuestion(questionDto);
+        return ResponseEntity.ok().body(result);
     }
 
-    @DeleteMapping("/deleteText/{id}")
-    public ResponseEntity deleteByIdText(@PathVariable int id) {
-        this.questionService.deleteByIdText(id);
-        if (this.questionService.findById(id).isEmpty()) return ResponseEntity.ok().build();
-        return ResponseEntity.badRequest().build();
+    @PutMapping("/{questionId}/editText")
+    public ResponseEntity<Question> editQuestion(@RequestBody TextQuestionDto questionDto) {
+        Question result = this.questionService.editTextQuestion(questionDto);
+        return ResponseEntity.ok().body(result);
     }
-
-
 }

@@ -1,9 +1,12 @@
 package timskiproekt.studyprep.Backend.Model.DTO;
 
-public record BoolQuestionDto(
+import java.util.ArrayList;
+
+public record SingleChoiceQuestionDto(
         String questionText,
         String questionType,
         int quizId,
         int questionId,
-        boolean correctAnswer
-) {}
+        ArrayList<String> answerOptions,
+        String correctAnswer
+){}

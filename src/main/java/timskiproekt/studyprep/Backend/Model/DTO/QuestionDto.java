@@ -1,16 +1,15 @@
 package timskiproekt.studyprep.Backend.Model.DTO;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
 public class QuestionDto {
-
-    private String questionText;
-    private int quizId;
-    private String answer1;
-    private String answer2;
-    private String answer3;
-    private String answer4;
-    private int answerCorrect;
-
+    private final String questionText;
+    private final String questionType;
+    private final int quizId;
+    private final int questionId;
 }

@@ -76,8 +76,8 @@ public class SubjectServiceImpl implements SubjectService {
         Quiz quiz = new Quiz();
         quiz.setQuizTitle(quizDTO.getQuizTitle());
         quiz.setQuizDescription(quizDTO.getQuizDescription());
-        quiz.setSubject(subject);
-        quiz.setUser(user);
+        quiz.setSubjectId(subject);
+        quiz.setUserId(user);
 
         // Save the new quiz to the database
         return quizRepository.save(quiz);

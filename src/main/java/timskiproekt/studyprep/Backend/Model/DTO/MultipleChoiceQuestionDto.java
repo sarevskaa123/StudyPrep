@@ -1,10 +1,14 @@
 package timskiproekt.studyprep.Backend.Model.DTO;
 
-public record TextQuestionDto(
+import java.util.ArrayList;
+
+public record MultipleChoiceQuestionDto(
         String questionText,
         String questionType,
         int quizId,
         int questionId,
-        String correctAnswer
-){}
+        ArrayList<String> answerOptions,
+        ArrayList<Boolean> isCorrect
+){
+}
 

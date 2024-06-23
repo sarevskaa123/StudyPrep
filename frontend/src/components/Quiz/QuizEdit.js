@@ -1,73 +1,176 @@
-import React from 'react';
-import {useNavigate} from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import axios from "../../custom-axios/axios";
+import "./QuizEdit.css";
 
-const QuizEdit = (props) => {
+const QuizEdit = () => {
+    const { quizId } = useParams();
+    const navigate = useNavigate();
 
-    const history = useNavigate();
-    const [formData, updateFormData] = React.useState({
-        quizTitle: "",
-        quizDescription: "",
-        subject: 0,
-    })
+    const [quiz, setQuiz] = useState(null);
+    const [questions, setQuestions] = useState([]);
+    const [questionType, setQuestionType] = useState('');
+    const [questionText, setQuestionText] = useState('');
+    const [answerOptions, setAnswerOptions] = useState(['', '', '', '']);
+    const [correctAnswer, setCorrectAnswer] = useState('');
+    const [isCorrect, setIsCorrect] = useState([false, false, false, false]);
 
-    const handleChange = (e) => {
-        updateFormData({
-            ...formData,
-            [e.target.name]: e.target.value.trim()
-        })
-    }
+    useEffect(() => {
+        const fetchQuizDetails = async () => {
+            try {
+                const response = await axios.get(`/quizzes/${quizId}`);
+                setQuiz(response.data);
+            } catch (error) {
+                console.error('Error fetching quiz details:', error);
+            }
+        };
 
+        const fetchQuestions = async () => {
+            try {
+                const response = await axios.get(`/questions/quiz/${quizId}`);
+                setQuestions(response.data);
+            } catch (error) {
+                console.error('Error fetching questions:', error);
+            }
+        };
 
-    const onFormSubmit = (e) => {
+        fetchQuizDetails();
+        fetchQuestions();
+    }, [quizId]);
+
+    const handleAddQuestion = async (e) => {
         e.preventDefault();
-        const quizTitle = formData.quizTitle !== "" ? formData.quizTitle : props.quiz.quizTitle;
-        const quizDescription = formData.quizDescription !== "" ? formData.quizDescription : props.quiz.quizDescription;
-        const subject = formData.subject !== 0 ? formData.subject : props.quiz.subjectId.subjectId;
+        const questionDto = {
+            questionText,
+            questionType,
+            quizId,
+            answerOptions,
+            correctAnswer,
+            isCorrect
+        };
 
-        props.onEditQuiz(props.quiz.quizId, quizTitle, quizDescription,subject);
-        history("/admin");
-    }
+        try {
+            let endpoint = `/questions/${quizId}/add${questionType}`;
+            const response = await axios.post(endpoint, questionDto);
+            setQuestions([...questions, response.data]);
+            setQuestionText('');
+            setAnswerOptions(['', '', '', '']);
+            setCorrectAnswer('');
+            setIsCorrect([false, false, false, false]);
+        } catch (error) {
+            console.error(`Error adding ${questionType} question:`, error);
+        }
+    };
 
-    return(
-        <div className="row mt-5">
-            <div className="col-md-5">
-                <form onSubmit={onFormSubmit}>
+    const handleDeleteQuestion = (questionId) => {
+        axios.delete(`/questions/delete/${questionId}`)
+            .then(() => {
+                setQuestions(questions.filter(q => q.questionId !== questionId));
+            })
+            .catch(error => {
+                console.error("There was an error deleting the question!", error);
+            });
+    };
+
+    return (
+        <div className="quiz-edit-container">
+            {quiz && <h1>{quiz.quizTitle}</h1>}
+            <form onSubmit={handleAddQuestion} className="question-form">
+                <div className="form-group">
+                    <label>Select question type</label>
+                    <select value={questionType} onChange={(e) => setQuestionType(e.target.value)}>
+                        <option value="">Select question type</option>
+                        <option value="Text">Text</option>
+                        <option value="Single">Single Choice</option>
+                        <option value="Multiple">Multiple Choice</option>
+                        <option value="Bool">Boolean</option>
+                    </select>
+                </div>
+                <div className="form-group">
+                    <label>Enter question text</label>
+                    <input
+                        type="text"
+                        placeholder="Enter question text"
+                        value={questionText}
+                        onChange={(e) => setQuestionText(e.target.value)}
+                    />
+                </div>
+                {(questionType === 'Single' || questionType === 'Multiple') && (
                     <div className="form-group">
-                        <label htmlFor="name">Quiz name</label>
-                        <input type="text"
-                               className="form-control"
-                               id="quizTitle"
-                               name="quizTitle"
-                               placeholder={props.quiz.quizTitle}
-                               onChange={handleChange}
+                        {answerOptions.map((option, index) => (
+                            <div key={index}>
+                                <label>Option {index + 1}</label>
+                                <input
+                                    type="text"
+                                    placeholder={`Option ${index + 1}`}
+                                    value={option}
+                                    onChange={(e) => {
+                                        const newOptions = [...answerOptions];
+                                        newOptions[index] = e.target.value;
+                                        setAnswerOptions(newOptions);
+                                    }}
+                                />
+                                {questionType === 'Multiple' && (
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            checked={isCorrect[index]}
+                                            onChange={(e) => {
+                                                const newIsCorrect = [...isCorrect];
+                                                newIsCorrect[index] = e.target.checked;
+                                                setIsCorrect(newIsCorrect);
+                                            }}
+                                        />
+                                        Correct
+                                    </label>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
+                {(questionType === 'Single' || questionType === 'Text') && (
+                    <div className="form-group">
+                        <label>Correct Answer</label>
+                        <input
+                            type="text"
+                            placeholder="Enter correct answer"
+                            value={correctAnswer}
+                            onChange={(e) => setCorrectAnswer(e.target.value)}
                         />
                     </div>
+                )}
+                {questionType === 'Bool' && (
                     <div className="form-group">
-                        <label htmlFor="price">Quiz description</label>
-                        <input type="text"
-                               className="form-control"
-                               id="quizDescription"
-                               name="quizDescription"
-                               placeholder={props.quiz.quizDescription}
-                               onChange={handleChange}
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label>Subject</label>
-                        <select name="subject" className="form-control" onChange={handleChange}>
-                            {props.subject.map((term) => {
-                                if(props.quiz.subjectId !== undefined &&
-                                    props.quiz.subjectId.subjectId === term.subjectId)
-                                    return <option defaultValue={props.quiz.subjectId.subjectId} value={term.subjectId}>{term.subjectName}</option>
-                                else return <option value={term.subjectId}>{term.subjectName}</option>
-                            })}
+                        <label>Correct Answer</label>
+                        <select value={correctAnswer} onChange={(e) => setCorrectAnswer(e.target.value)}>
+                            <option value="">Select correct answer</option>
+                            <option value="true">True</option>
+                            <option value="false">False</option>
                         </select>
                     </div>
-                    <button id="submit" type="submit" className="btn btn-primary">Submit</button>
-                </form>
+                )}
+                <button type="submit">Add Question</button>
+            </form>
+            <div className="questions-list">
+                <h2>Questions</h2>
+                <ul>
+                    {questions.length === 0 ? (
+                        <li>No questions available</li>
+                    ) : (
+                        questions.map(question => (
+                            <li key={question.questionId} className="question-item">
+                                <span>{question.questionText}</span>
+                                <div className="button-group">
+                                    <button onClick={() => handleDeleteQuestion(question.questionId)}>Delete</button>
+                                    <button onClick={() => navigate(`/questions/edit/${question.questionId}`)}>Edit</button>
+                                </div>
+                            </li>
+                        ))
+                    )}
+                </ul>
             </div>
         </div>
-    )
-}
+    );
+};
 
 export default QuizEdit;

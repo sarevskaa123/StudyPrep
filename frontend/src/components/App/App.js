@@ -2,7 +2,8 @@ import React, { Component } from "react";
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Header from "../Header/header";
 import QuizAdd from "../Quiz/QuizAdd";
-import QuizEdit from "../Quiz/QuizEdit";
+import QuizEdit from '../Quiz/QuizEdit';
+import QuestionEdit from '../Question/QuestionEdit';
 import Quizzes from "../Quiz/quizzes";
 import Subject from '../Subject/Subject';
 import SubjectDetail from '../Subject/SubjectDetail';
@@ -10,11 +11,6 @@ import Register from "../Users/Register";
 import Login from "../Users/Login";
 import StudyPrepService from "../../repository/StudyPrepRepository";
 import Home from "../Home/Home";
-import QuestionSingleCreate from "../Question/QuestionSingleCreate";
-import QuestionMultipleCreate from "../Question/QuestionMultipleCreate";
-import QuestionBoolCreate from "../Question/QuestionBoolCreate";
-import QuestionTextCreate from "../Question/QuestionTextCreate";
-import QuestionsList from "../Question/QuestionsList";
 import axios from "../../custom-axios/axios";
 
 class App extends Component {
@@ -44,21 +40,6 @@ class App extends Component {
         }
     };
 
-    // fetchQuizzes = async (subjectId) => {
-    //     try {
-    //         const response = await fetch(`/api/quizzes/${subjectId}/quizzes`);
-    //         const text = await response.text();
-    //         console.log("fetchQuizzes response text:", text); // Log response text
-    //         if (!response.ok) {
-    //             throw new Error(`Error: ${response.statusText}`);
-    //         }
-    //         return JSON.parse(text);
-    //     } catch (error) {
-    //         console.error("Failed to fetch quizzes:", error);
-    //         throw error;
-    //     }
-    // };
-
     addQuizToSubject = async (subjectId, quizData) => {
         try {
             const endpoint = `/quizzes/${subjectId}/add`;
@@ -85,11 +66,6 @@ class App extends Component {
                 <main>
                     <div className={"container"}>
                         <Routes>
-                            <Route path={"/question/allQuestions/:id"} element={
-                                <QuestionsList questions={this.state.quizQuestions}
-                                               onDeleteQuestion={this.deleteQuestion}
-                                               user={this.state.user}
-                                />}/>
                             <Route path={"/addQuiz"} element={
                                 <QuizAdd subject={this.state.subjects}
                                          user={this.state.user}
@@ -98,41 +74,29 @@ class App extends Component {
                                 <QuizEdit subject={this.state.subjects} onEditQuiz={this.editQuiz}
                                           quiz={this.state.selectedQuiz}
                                           user={this.state.user}/>}/>
+                            <Route path={"/quizzes/edit/:quizId"} element={
+                                <QuizEdit onEditQuiz={this.editQuiz} />
+                            } />
                             <Route path={"/admin"} element={<Quizzes quizzes={this.state.quizzes}
                                                                      user={this.state.user}
                                                                      onDelete={this.deleteQuiz}
                                                                      onEdit={this.getQuiz}
                                                                      onView={this.loadQuestionsForQuiz}
                             />}/>
-                            <Route path={"/question/addSingle/:id"}
-                                   element={<QuestionSingleCreate onQuestionSingleCreate={this.questionSingleCreate}
-                                                                  quiz={this.state.selectedQuiz}
-                                                                  user={this.state.user}/>}/>
-                            <Route path={"/question/addMultiple/:id"}
-                                   element={<QuestionMultipleCreate
-                                       onQuestionMultipleCreate={this.questionMultipleCreate}
-                                       quiz={this.state.selectedQuiz}
-                                       user={this.state.user}/>}/>
-                            <Route path={"/question/addBool/:id"}
-                                   element={<QuestionBoolCreate onQuestionBoolCreate={this.questionBoolCreate}
-                                                                user={this.state.user}
-                                                                quiz={this.state.selectedQuiz}/>}/>
-                            <Route path={"/question/addText/:id"}
-                                   element={<QuestionTextCreate onQuestionTextCreate={this.questionTextCreate}
-                                                                user={this.state.user}
-                                                                quiz={this.state.selectedQuiz}/>}/>
+
                             <Route path={"/profile"}/>
                             <Route path="/subjects" element={<Subject />} />
                             <Route path="/subjects/:subjectId" element={
                                 <SubjectDetail
                                     fetchSubjectDetails={this.fetchSubjectDetails}
-                                    fetchQuizzes={this.fetchQuizzes}
+                                    addQuizToSubject={this.addQuizToSubject}
                                 />
                             } />
                             <Route path="/quizzes" element={<Quizzes />} />
                             <Route path={"/login"} element={<Login onLogin={this.fetchData}/>}/>
                             <Route path={"/register"} element={<Register onRegister={this.fetchData}/>}/>
                             <Route path={"/"} element={<Home user={this.state.user}/>}/>
+                            <Route path="/questions/edit/:questionId" element={<QuestionEdit />} />
                         </Routes>
                     </div>
                 </main>

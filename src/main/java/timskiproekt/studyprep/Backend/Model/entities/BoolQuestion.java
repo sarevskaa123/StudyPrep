@@ -1,28 +1,21 @@
 package timskiproekt.studyprep.Backend.Model.entities;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-import javax.persistence.*;
-import lombok.Data;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import javax.persistence.Entity;
 
-@Data
+@Getter
+@Setter
 @Entity
-public class BoolQuestion {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int boolQuestionId;
-    private String boolQuestionText;
-    private Boolean isCorrect;
-    @ManyToOne
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "quizId")
-    private Quiz quiz;
+@AllArgsConstructor
+public class BoolQuestion extends Question {
+    private boolean correctAnswer;
 
-    public BoolQuestion(String boolQuestionText, Boolean isCorrect, Quiz quiz) {
-        this.boolQuestionText = boolQuestionText;
-        this.isCorrect = isCorrect;
-        this.quiz = quiz;
+    public BoolQuestion(String questionText, boolean correctAnswer, Quiz quiz) {
+        super(questionText, "Bool", quiz);
+        this.correctAnswer = correctAnswer;
     }
 
     public BoolQuestion() {

@@ -1,32 +1,39 @@
 package timskiproekt.studyprep.Backend.Model.entities;
 
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-import timskiproekt.studyprep.Backend.Model.enums.QuestionType;
+
+// Represents a generic question. Each specific type of question will extend this model.
 
 @Data
 @Entity
-public class Question {
+@Inheritance(strategy = InheritanceType.JOINED)
+@AllArgsConstructor
+public abstract class Question {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int questionId;
     private String questionText;
+    private String questionType; // text, single, multiple, bool
+
+
     @ManyToOne
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "quizId")
+    @JoinColumn(name = "quiz_id")
+    @JsonBackReference
     private Quiz quiz;
-    @Enumerated(value = EnumType.STRING)
-    private QuestionType questionType;
+
+    public Question(String questionText, String questionType, Quiz quiz) {
+        this.questionText = questionText;
+        this.questionType = questionType;
+        this.quiz = quiz;
+    }
 
 
     public Question() {
-    }
 
-    public Question(String questionText, Quiz quiz, QuestionType questionType) {
-        this.questionText = questionText;
-        this.quiz = quiz;
-        this.questionType = questionType;
     }
 }
+

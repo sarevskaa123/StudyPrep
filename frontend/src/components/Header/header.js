@@ -12,6 +12,7 @@ const Header = (props) => {
                     localStorage.removeItem("Username");
                     localStorage.removeItem("Email");
                     localStorage.removeItem("Userrole");
+                    localStorage.removeItem("UserId");
                     window.location.reload();
                 }}>Logout
                 </button>
@@ -35,6 +36,15 @@ const Header = (props) => {
         );
     }
 
+    let subjects;
+    if (localStorage.getItem("Userrole") === "ADMIN") {
+        subjects = (
+            <li className="nav-item">
+                <Link className="nav-link" to="/subjects">Subjects</Link>
+            </li>
+        );
+    }
+
     return (
         <header>
             <nav className="navbar navbar-expand-md navbar-dark navbar-fixed bg-dark">
@@ -45,9 +55,7 @@ const Header = (props) => {
                 </button>
                 <div className="collapse navbar-collapse" id="navbarCollapse">
                     <ul className="navbar-nav mr-auto">
-                        <li className="nav-item">
-                            <Link className="nav-link" to="/subjects">Subjects</Link>
-                        </li>
+                        {subjects}
                         <li className="nav-item">
                             <Link className="nav-link" to="/quizzes">Quizzes</Link>
                         </li>

@@ -11,6 +11,7 @@ import Register from "../Users/Register";
 import Login from "../Users/Login";
 import StudyPrepService from "../../repository/StudyPrepRepository";
 import Home from "../Home/Home";
+import UserInfo from "../Users/userProfile"
 import axios from "../../custom-axios/axios";
 
 class App extends Component {
@@ -21,6 +22,7 @@ class App extends Component {
             subjects: [],
             selectedQuiz: {},
             user: {},
+            userInfo:[],
             quizQuestions: []
         }
     }
@@ -84,7 +86,7 @@ class App extends Component {
                                                                      onView={this.loadQuestionsForQuiz}
                             />}/>
 
-                            <Route path={"/profile"}/>
+                            <Route path={"/profile"} element={<UserInfo quizzes={this.state.quizzes} />}/>
                             <Route path="/subjects" element={<Subject />} />
                             <Route path="/subjects/:subjectId" element={
                                 <SubjectDetail
@@ -124,6 +126,14 @@ class App extends Component {
         StudyPrepService.fetchQuestions().then((data)=>{
             this.setState({
                 quizQuestions:data.data
+            })
+        })
+    }
+
+    getUserInfo=(id)=>{
+        StudyPrepService.getUserInfo(id).then((data)=>{
+            this.setState({
+                userInfo : data.data
             })
         })
     }

@@ -12,7 +12,7 @@ const StudyPrepService = {
         return axios.get("/question/all");
     },
     fetchQuestionsForQuiz:(id)=>{
-        return axios.get(`/question/allQuestions/${id}`);
+        return axios.get(`/questions/quiz/${id}`);
     },
     deleteQuiz:(id)=>{
         return axios.delete(`/quiz/delete/${id}`)
@@ -115,6 +115,9 @@ const StudyPrepService = {
             "quizId":quizId,
             "answerText":answerText
         });
+    },
+    getUserInfo:(id)=>{
+        return axios.get(`/user/${id}`);
     }
 }
 

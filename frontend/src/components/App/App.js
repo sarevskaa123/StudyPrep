@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Header from "../Header/header";
 import QuizAdd from "../Quiz/QuizAdd";
+import LeaderboardQuiz from "../Quiz/LeaderboardQuiz";
 import QuizEdit from '../Quiz/QuizEdit';
 import QuestionEdit from '../Question/QuestionEdit';
 import Quizzes from "../Quiz/quizzes";
@@ -12,6 +13,8 @@ import Login from "../Users/Login";
 import StudyPrepService from "../../repository/StudyPrepRepository";
 import Home from "../Home/Home";
 import UserInfo from "../Users/userProfile"
+import Leaderboard from "../Users/Leaderboard"
+
 import axios from "../../custom-axios/axios";
 
 class App extends Component {
@@ -95,10 +98,12 @@ class App extends Component {
                                 />
                             } />
                             <Route path="/quizzes" element={<Quizzes />} />
+                            <Route path="/leaderboard" element={<Leaderboard quizzes={this.state.quizzes}/>}/>
                             <Route path={"/login"} element={<Login onLogin={this.fetchData}/>}/>
                             <Route path={"/register"} element={<Register onRegister={this.fetchData}/>}/>
                             <Route path={"/"} element={<Home user={this.state.user}/>}/>
                             <Route path="/questions/edit/:questionId" element={<QuestionEdit />} />
+                            <Route path="/leaderboardQuiz/:quizId" element={<LeaderboardQuiz />} />
                         </Routes>
                     </div>
                 </main>

@@ -7,7 +7,7 @@ const Header = (props) => {
     if (localStorage.getItem("Username")) {
         authenticate = (
             <div>
-                <Link className="btn btn-outline-info my-2 my-sm-0" to="/profile">Profile</Link>
+                <Link className="btn btn-outline-info my-2 my-sm-0" to="/profile" >Profile</Link>
                 <button className="btn btn-outline-info my-2 my-sm-0" onClick={() => {
                     localStorage.removeItem("Username");
                     localStorage.removeItem("Email");
@@ -21,20 +21,20 @@ const Header = (props) => {
     } else {
         authenticate = (
             <div>
-                <Link className="btn btn-outline-info my-2 my-sm-0" to="/login">Login</Link>
-                <Link className="btn btn-outline-info my-2 my-sm-0" to="/register">Register</Link>
+                <Link className="btn btn-outline-info my-2 my-sm-0"  to="/login">Login</Link>
+                <Link className="btn btn-outline-info my-2 my-sm-0" to="/register" >Register</Link>
             </div>
         );
     }
 
-    let admin;
-    if (localStorage.getItem("Userrole") === "ADMIN") {
-        admin = (
-            <li className="nav-item active">
-                <Link className="nav-link" to="/admin">Admin</Link>
-            </li>
-        );
-    }
+    // let admin;
+    // if (localStorage.getItem("Userrole") === "ADMIN") {
+    //     admin = (
+    //         <li className="nav-item active">
+    //             <Link className="nav-link" to="/admin">Admin</Link>
+    //         </li>
+    //     );
+    // }
 
     let subjects;
     if (localStorage.getItem("Userrole") === "ADMIN") {
@@ -59,7 +59,10 @@ const Header = (props) => {
                         <li className="nav-item">
                             <Link className="nav-link" to="/quizzes">Quizzes</Link>
                         </li>
-                        {admin}
+                        <li className="nav-item">
+                            <Link className="nav-link" to="/leaderboard">Leaderboard</Link>
+                        </li>
+                        {/*{admin}*/}
                     </ul>
                     {authenticate}
                 </div>

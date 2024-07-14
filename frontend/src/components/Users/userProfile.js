@@ -65,22 +65,21 @@ const UserInfo = (props) => {
                     <td style={thTdStyle}>Total points</td>
                 </tr>
 
-                    {userInfo[1].map(quizAttempt => (
+                {userInfo[1].map(quizAttempt => (
                         <tr>
                             {/*<li key={quizAttempt.attemptId}>*/}
-                                <td style={thStyle}><p> {quizAttempt.quiz.quizTitle}</p></td>
-                                <td style={thStyle}><p> {quizAttempt.quiz.subjectId.subjectName}</p></td>
-                                <td style={thStyle}><p> {quizAttempt.startTIme}</p></td>
-                                <td style={thStyle}><p> {quizAttempt.finishTIme}</p></td>
-                                <td style={thStyle}><p> {quizAttempt.finalResult}</p></td>
+                            <td style={thStyle}><p> {quizAttempt.quiz.quizTitle}</p></td>
+                            <td style={thStyle}><p> {quizAttempt.quiz.subjectId.subjectName}</p></td>
+                            <td style={thStyle}><p> {quizAttempt.startTIme}</p></td>
+                            <td style={thStyle}><p> {quizAttempt.finishTIme}</p></td>
+                            <td style={thStyle}><p> {quizAttempt.finalResult}</p></td>
                             {/*</li>*/}
                         </tr>
-                        )
-                    )}
+                    )
+                )}
             </table>
         </div>
-    )
-        ;
+    );
 }
 
 

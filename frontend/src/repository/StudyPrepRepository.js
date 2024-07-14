@@ -118,6 +118,9 @@ const StudyPrepService = {
     },
     getUserInfo:(id)=>{
         return axios.get(`/user/${id}`);
+    },
+    getLeaderboard:()=>{
+        return axios.get("/user/leaderboard");
     }
 }
 

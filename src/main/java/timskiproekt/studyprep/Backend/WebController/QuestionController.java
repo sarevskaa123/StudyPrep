@@ -93,4 +93,14 @@ public class QuestionController {
         Question result = this.questionService.editTextQuestion(questionDto);
         return ResponseEntity.ok().body(result);
     }
+
+    @GetMapping("/quiz/random/{quizId}")
+    public ResponseEntity<List<Question>> getRandomQuestionsForQuiz(@PathVariable int quizId, @RequestParam int count) {
+        List<Question> randomQuestions = questionService.getRandomQuestionsForQuiz(quizId, count);
+        if (randomQuestions.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok().body(randomQuestions);
+    }
+
 }

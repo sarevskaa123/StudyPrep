@@ -14,6 +14,7 @@ import StudyPrepService from "../../repository/StudyPrepRepository";
 import Home from "../Home/Home";
 import UserInfo from "../Users/userProfile"
 import Leaderboard from "../Users/Leaderboard"
+import QuizStart from '../Quiz/QuizStart';
 
 import axios from "../../custom-axios/axios";
 
@@ -104,7 +105,7 @@ class App extends Component {
                             <Route path={"/"} element={<Home user={this.state.user}/>}/>
                             <Route path="/questions/edit/:questionId" element={<QuestionEdit />} />
                             <Route path="/leaderboardQuiz/:quizId" element={<LeaderboardQuiz />} />
-                        </Routes>
+                            <Route path="/quizzes/start/:quizId" element={<QuizStart />} />                        </Routes>
                     </div>
                 </main>
             </Router>

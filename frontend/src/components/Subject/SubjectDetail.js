@@ -10,8 +10,8 @@ const SubjectDetail = () => {
 
     const fetchQuizzes = useCallback(async () => {
         try {
-            const response = await axios.get(`/quizzes/subject/${subjectId}`); // Ensure this is the correct endpoint
-            setQuizzes(response.data || []); // Add a default empty array if response.data is undefined
+            const response = await axios.get(`/quizzes/subject/${subjectId}`);
+            setQuizzes(response.data || []);
         } catch (error) {
             console.error('Error fetching quizzes:', error);
         }
@@ -19,7 +19,7 @@ const SubjectDetail = () => {
 
     const fetchSubject = useCallback(async () => {
         try {
-            const response = await axios.get(`/subjects/${subjectId}`); // Ensure this is the correct endpoint
+            const response = await axios.get(`/subjects/${subjectId}`);
             setSubject(response.data);
         } catch (error) {
             console.error('Error fetching subject details:', error);
@@ -36,11 +36,8 @@ const SubjectDetail = () => {
     const handleAddQuiz = async (e) => {
         e.preventDefault();
         try {
-            const endpoint = `/quizzes/${subjectId}/add`; // Ensure this is the correct endpoint
-            console.log("addQuizToSubject endpoint:", endpoint);
-            const response = await axios.post(endpoint, {
-                quizTitle: newQuizName.trim()
-            });
+            const endpoint = `/quizzes/${subjectId}/add`;
+            const response = await axios.post(endpoint, { quizTitle: newQuizName.trim() });
             setQuizzes([...quizzes, response.data]);
             setNewQuizName('');
         } catch (error) {
@@ -50,7 +47,7 @@ const SubjectDetail = () => {
 
     const handleDeleteQuiz = async (quizId) => {
         try {
-            await axios.delete(`/quizzes/delete/${quizId}`); // Ensure this is the correct endpoint
+            await axios.delete(`/quizzes/delete/${quizId}`);
             setQuizzes(quizzes.filter(quiz => quiz.quizId !== quizId));
         } catch (error) {
             console.error('Error deleting quiz:', error);
@@ -77,6 +74,9 @@ const SubjectDetail = () => {
                             <button onClick={() => handleDeleteQuiz(quiz.quizId)}>Delete</button>
                             <Link to={`/quizzes/edit/${quiz.quizId}`}>
                                 <button>Edit</button>
+                            </Link>
+                            <Link to={`/quizzes/start/${quiz.quizId}`}>
+                                <button>Start Quiz</button>
                             </Link>
                         </li>
                     ))

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const Header = (props) => {
+const Header = () => {
     let authenticate;
     if (localStorage.getItem("Username")) {
         authenticate = (
@@ -57,7 +57,7 @@ const Header = (props) => {
                     <ul className="navbar-nav mr-auto">
                         {subjects}
                         <li className="nav-item">
-                            <Link className="nav-link" to="/quizzes">Quizzes</Link>
+                            <Link className="nav-link" to="/subjects">Subjects</Link>
                         </li>
                         <li className="nav-item">
                             <Link className="nav-link" to="/leaderboard">Leaderboard</Link>

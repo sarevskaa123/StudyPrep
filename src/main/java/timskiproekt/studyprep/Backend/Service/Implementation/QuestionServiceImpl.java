@@ -10,8 +10,10 @@ import timskiproekt.studyprep.Backend.Repository.QuestionRepository;
 import timskiproekt.studyprep.Backend.Repository.QuizRepository;
 import timskiproekt.studyprep.Backend.Service.QuestionService;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class QuestionServiceImpl implements QuestionService {
@@ -195,6 +197,13 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public void deleteQuestionById(int questionId) {
         questionRepository.deleteById(questionId);
+    }
+
+    @Override
+    public List<Question> getRandomQuestionsForQuiz(int quizId, int count) {
+        List<Question> questions = questionRepository.findAllByQuizQuizId(quizId);
+        Collections.shuffle(questions);
+        return questions.stream().limit(count).collect(Collectors.toList());
     }
 }
 

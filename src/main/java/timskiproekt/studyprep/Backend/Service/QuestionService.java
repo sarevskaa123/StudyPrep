@@ -32,4 +32,6 @@ public interface QuestionService {
 //    List<QuestionDto> getQuestionsByQuizId(int quizId);
 
     void deleteQuestionById(int questionId);
+
+    List<Question> getRandomQuestionsForQuiz(int quizId, int count);
 }

@@ -116,7 +116,7 @@ public class QuizServiceImpl implements QuizService {
         Subject subject = this.subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new SubjectNotFound(subjectId));
 
-        return quizRepository.findBySubjectId(subject);
+        return quizRepository.findBySubject(subject);
     }
 
     @Override

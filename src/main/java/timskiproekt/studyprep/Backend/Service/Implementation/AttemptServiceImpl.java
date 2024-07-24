@@ -3,7 +3,6 @@ package timskiproekt.studyprep.Backend.Service.Implementation;
 import org.springframework.stereotype.Service;
 import timskiproekt.studyprep.Backend.Model.entities.Attempt;
 import timskiproekt.studyprep.Backend.Model.entities.Quiz;
-import timskiproekt.studyprep.Backend.Model.entities.Subject;
 import timskiproekt.studyprep.Backend.Model.entities.User;
 import timskiproekt.studyprep.Backend.Repository.AttemptRepository;
 import timskiproekt.studyprep.Backend.Repository.SubjectRepository;
@@ -15,23 +14,24 @@ import java.util.Optional;
 
 @Service
 public class AttemptServiceImpl implements AttemptService {
-    private final UserRepository userRepository;
     private final AttemptRepository attemptRepository;
-    private final SubjectRepository subjectRepository;
 
-    public AttemptServiceImpl(UserRepository userRepository, AttemptRepository attemptRepository, SubjectRepository subjectRepository) {
-        this.userRepository = userRepository;
+    public AttemptServiceImpl(AttemptRepository attemptRepository) {
         this.attemptRepository = attemptRepository;
-        this.subjectRepository = subjectRepository;
     }
 
     @Override
-    public Optional<List<Attempt>> UserAttempts(Optional<User> u) {
-        return Optional.ofNullable(attemptRepository.findAllByUser(u));
+    public List<Attempt> UserAttempts(User u) {
+        return attemptRepository.findAllByUser(Optional.ofNullable(u));
     }
 
     @Override
     public Optional<List<Attempt>> findAllBySubjectId(Optional<Quiz> quiz) {
         return Optional.ofNullable(attemptRepository.findAllByQuizOrderByFinalResultDesc(quiz));
+    }
+
+    @Override
+    public Attempt saveAttempt(Attempt attempt) {
+        return attemptRepository.save(attempt);
     }
 }

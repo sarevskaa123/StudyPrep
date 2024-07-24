@@ -1,10 +1,7 @@
-import React, {useState, useEffect} from 'react';
-import axios from 'axios';
-import {Link, useParams} from "react-router-dom";
+import React from 'react';
+import { Link } from "react-router-dom";
 
 const Leaderboard = (props) => {
-
-
     const titleStyle = {
         marginTop: "30px",
         textAlign: "center",
@@ -24,12 +21,6 @@ const Leaderboard = (props) => {
         textAlign: 'center',
         padding: "20px"
     };
-
-    const thStyle = {
-        ...thTdStyle,
-        backgroundColor: '#f2f2f2'
-    };
-
     const buttonStyle = {
         backgroundColor: 'green',
         border: "2px solid white",
@@ -43,27 +34,29 @@ const Leaderboard = (props) => {
         <div>
             <h1 style={titleStyle}>Leaderboards for all quizzes</h1>
             <table style={tableStyle}>
+                <thead>
                 <tr>
-                    <td style={thTdStyle}>Quiz Title</td>
-                    <td style={thTdStyle}>Subject</td>
-                    <td style={thTdStyle}></td>
-
+                    <th style={thTdStyle}>Quiz Title</th>
+                    <th style={thTdStyle}>Subject</th>
+                    <th style={thTdStyle}></th>
                 </tr>
-                {props.quizzes.map(q => (
-                    <tr>
-                        <td style={thStyle}><p>{q.quizTitle}</p></td>
-                        <td style={thStyle}><p>{q.subjectId.subjectName}</p></td>
-                        <td style={thStyle}>
-                            <Link to={`/leaderboardQuiz/${q.quizId}`} ><button style={buttonStyle}>See leaderboard
-                            </button></Link>
-
+                </thead>
+                <tbody>
+                {props.quizzes.map((q, index) => (
+                    <tr key={index}>
+                        <td style={thTdStyle}>{q.quizTitle}</td>
+                        <td style={thTdStyle}>{q.subject?.subjectName || 'N/A'}</td>
+                        <td style={thTdStyle}>
+                            <Link to={`/leaderboardQuiz/${q.quizId}`}>
+                                <button style={buttonStyle}>See leaderboard</button>
+                            </Link>
                         </td>
                     </tr>
                 ))}
+                </tbody>
             </table>
         </div>
     );
-
-}
+};
 
 export default Leaderboard;

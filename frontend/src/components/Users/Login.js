@@ -31,7 +31,7 @@ const Login = (props) => {
             localStorage.setItem("Email", resp.data.email);
             localStorage.setItem("Userrole", resp.data.userRole);
             props.onLogin()
-            history("/quizzes");
+            history("/");
         })
     }
 

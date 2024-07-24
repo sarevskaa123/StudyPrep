@@ -59,7 +59,7 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     public List<Quiz> findQuizzesBySubjectId(Subject subjectId) {
-        return quizRepository.findBySubjectId(subjectId);
+        return quizRepository.findBySubject(subjectId);
     }
 
     @Override

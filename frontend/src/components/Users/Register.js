@@ -5,7 +5,7 @@ import StudyPrepService from "../../repository/StudyPrepRepository";
 
 const Register = (props) => {
 
-    const history = useNavigate();
+    const navigate = useNavigate();
     const [formData, updateFormData] = React.useState({
         username: "",
         email:"",
@@ -23,9 +23,9 @@ const Register = (props) => {
     const onFormSubmit = (e) => {
         e.preventDefault();
         try {
-            StudyPrepService.register(formData.username, formData.email, formData.password, formData.repeatPassword).then(resp => {
+            StudyPrepService.register(formData.username, formData.email, formData.password, formData.repeatPassword).then(() => {
                 props.onRegister()
-                history("/quizzes");
+                navigate("/"); // Redirect to the home page
             })
         }
         catch (error){

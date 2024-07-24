@@ -4,7 +4,6 @@ import javax.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-
 import java.sql.Timestamp;
 
 @Data
@@ -12,9 +11,13 @@ import java.sql.Timestamp;
 public class Attempt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "attempt_id")
     private int attemptId;
-    private Timestamp startTIme;
-    private Timestamp finishTIme;
+    @Column(name = "start_time")
+    private Timestamp startTime;
+    @Column(name = "finish_time")
+    private Timestamp finishTime;
+    @Column(name = "final_result")
     private float finalResult;
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -24,5 +27,4 @@ public class Attempt {
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "quizId")
     private Quiz quiz;
-
 }

@@ -1,16 +1,11 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import {Link, useParams} from "react-router-dom";
-import leaderboard from "../Users/Leaderboard";
+import { Link, useParams } from "react-router-dom";
 
-const LeaderboardQuiz = (props) => {
-    const {quizId} = useParams();
-    const [leaderboardInfo, setLeaderboardInfo] = useState({
-        leaderboardInfo: []
-    });
-    const [quizInfo, setQuizInfo] = useState({
-        quizInfo: []
-    });
+const LeaderboardQuiz = () => {
+    const { quizId } = useParams();
+    const [leaderboardInfo, setLeaderboardInfo] = useState([]);
+    const [quizInfo, setQuizInfo] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -28,26 +23,11 @@ const LeaderboardQuiz = (props) => {
             }
         };
 
-        // const FetchQuizinfo = async () =>{
-        //     try {
-        //         const response = await axios.get(`http://localhost:8081/api/quizzes/${quizId}`);
-        //         setQuizInfo(response.data);
-        //     } catch (err) {
-        //         setError(err);
-        //     } finally {
-        //         setLoading(false);
-        //     }
-        //
-        // };
-
-        //      FetchQuizinfo();
         fetchLeaderboardInfo();
-    }, []);
-
+    }, [quizId]);
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error.message}</div>;
-
 
     const titleStyle = {
         marginTop: "30px",
@@ -85,35 +65,46 @@ const LeaderboardQuiz = (props) => {
         marginRight: "200px",
         marginTop: "30px",
         alignSelf: "right"
-    }
+    };
 
+    const formatDate = (timestamp) => {
+        const date = new Date(timestamp);
+        return date.toLocaleString();
+    };
 
     return (
         <div>
             <div>
                 <h1 style={titleStyle}>Title: {quizInfo.quizTitle}</h1>
-                <h2 style={titleStyle}>Subject: {quizInfo.subjectId.subjectName}</h2>
+                <h2 style={titleStyle}>Subject: {quizInfo.subject?.subjectName || 'N/A'}</h2>
                 <h4 style={titleStyle}>Description: {quizInfo.quizDescription}</h4>
             </div>
 
             <table style={tableStyle}>
-                {leaderboardInfo.map(l => (
-                    <tr>
+                <thead>
+                <tr>
+                    <th style={thStyle}>Username</th>
+                    <th style={thStyle}>Start Time</th>
+                    <th style={thStyle}>Finish Time</th>
+                    <th style={thStyle}>Final Result</th>
+                </tr>
+                </thead>
+                <tbody>
+                {leaderboardInfo.map((l, index) => (
+                    <tr key={index}>
                         <td style={thTdStyle}>{l.user.username}</td>
-                        <td style={thTdStyle}>{l.startTIme}</td>
-                        <td style={thTdStyle}>{l.finishTIme}</td>
+                        <td style={thTdStyle}>{formatDate(l.startTime)}</td>
+                        <td style={thTdStyle}>{formatDate(l.finishTime)}</td>
                         <td style={thTdStyle}>{l.finalResult}</td>
                     </tr>
                 ))}
+                </tbody>
             </table>
             <Link to={"/leaderboard"}>
                 <button style={buttonstyle}>Go back</button>
             </Link>
         </div>
-
-    )
-
-}
-
+    );
+};
 
 export default LeaderboardQuiz;

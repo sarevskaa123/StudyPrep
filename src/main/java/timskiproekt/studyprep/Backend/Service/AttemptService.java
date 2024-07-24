@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface AttemptService {
-    public Optional<List<Attempt>> UserAttempts(Optional<User> u);
-    public Optional<List<Attempt>> findAllBySubjectId(Optional<Quiz> quiz);
+    List<Attempt> UserAttempts(User u);
+    Optional<List<Attempt>> findAllBySubjectId(Optional<Quiz> quiz);
+
+    Attempt saveAttempt(Attempt attempt);
+
 }

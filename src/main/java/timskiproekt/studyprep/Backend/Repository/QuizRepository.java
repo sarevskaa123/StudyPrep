@@ -12,5 +12,5 @@ public interface QuizRepository extends JpaRepository<Quiz, Integer> {
 
     void deleteByQuizTitle(String title);
 
-    List<Quiz> findBySubjectId(Subject subjectId);
+    List<Quiz> findBySubject(Subject subject);
 }

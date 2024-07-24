@@ -13,6 +13,7 @@ const QuizStart = () => {
     const [userAnswers, setUserAnswers] = useState([]);
     const [selectedAnswer, setSelectedAnswer] = useState([]);
     const [subjectId, setSubjectId] = useState(null);
+    const [quizFinished, setQuizFinished] = useState(false); // New state to track quiz completion
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -22,7 +23,6 @@ const QuizStart = () => {
                 setQuestions(response.data);
                 setStartTime(new Date());
 
-                // Fetch the subject ID (assuming your API returns it as part of the quiz data)
                 const quizResponse = await axios.get(`http://localhost:8081/api/quizzes/${quizId}`);
                 setSubjectId(quizResponse.data.subjectId.subjectId);
             } catch (error) {
@@ -32,6 +32,12 @@ const QuizStart = () => {
 
         fetchQuestions();
     }, [quizId]);
+
+    useEffect(() => {
+        if (quizFinished) {
+            saveAttempt();
+        }
+    }, [score, quizFinished]); // Run saveAttempt when score or quizFinished changes
 
     const handleAnswerSelect = (index, isChecked) => {
         const updatedSelectedAnswer = [...selectedAnswer];
@@ -70,7 +76,7 @@ const QuizStart = () => {
         setUserAnswers(updatedUserAnswers);
 
         if (isCorrect) {
-            setScore(updatedUserAnswers.filter(answer => answer.isCorrect).length);
+            setScore(prevScore => prevScore + 1); // Update score correctly
         }
 
         if (moveNext) {
@@ -93,6 +99,7 @@ const QuizStart = () => {
         } else {
             setEndTime(new Date());
             setShowResults(true);
+            setQuizFinished(true); // Mark the quiz as finished
         }
     };
 
@@ -109,6 +116,23 @@ const QuizStart = () => {
         }
     };
 
+    const saveAttempt = async () => {
+        const userId = localStorage.getItem('UserId'); // Get the user ID from local storage
+        const attemptData = {
+            startTime,
+            finishTime: new Date(),
+            finalResult: score,
+            user: { userId: userId }, // Use the stored user ID
+            quiz: { quizId: quizId }
+        };
+
+        try {
+            await axios.post('http://localhost:8081/api/user/attempts', attemptData);
+        } catch (error) {
+            console.error('Error saving attempt:', error);
+        }
+    };
+
     const handleQuitQuiz = () => {
         if (subjectId) {
             navigate(`/subjects/${subjectId}`);
@@ -119,21 +143,27 @@ const QuizStart = () => {
 
     if (showResults) {
         const timeTaken = (endTime - startTime) / 1000; // Time taken in seconds
+        const incorrectAnswers = userAnswers.filter(answer => !answer.isCorrect);
+
         return (
             <div>
                 <h1>Quiz Results</h1>
                 <p>Score: {score} / {questions.length}</p>
                 <p>Time Taken: {timeTaken.toFixed(2)} seconds</p>
                 <h2>Incorrect Answers</h2>
-                <ul>
-                    {userAnswers.filter(answer => !answer.isCorrect).map((answer, index) => (
-                        <li key={index}>
-                            <p><strong>Question:</strong> {answer.question.questionText}</p>
-                            <p><strong>Your Answer:</strong> {Array.isArray(answer.userAnswer) ? answer.userAnswer.filter(Boolean).join(', ') : answer.userAnswer}</p>
-                            <p><strong>Correct Answer:</strong> {answer.correctAnswer}</p>
-                        </li>
-                    ))}
-                </ul>
+                {incorrectAnswers.length === 0 ? (
+                    <p>There are no incorrect answers. Great job!</p>
+                ) : (
+                    <ul>
+                        {incorrectAnswers.map((answer, index) => (
+                            <li key={index}>
+                                <p><strong>Question:</strong> {answer.question.questionText}</p>
+                                <p><strong>Your Answer:</strong> {Array.isArray(answer.userAnswer) ? answer.userAnswer.filter(Boolean).join(', ') : answer.userAnswer}</p>
+                                <p><strong>Correct Answer:</strong> {answer.correctAnswer}</p>
+                            </li>
+                        ))}
+                    </ul>
+                )}
                 <button onClick={() => navigate('/')}>Back to Home</button>
             </div>
         );

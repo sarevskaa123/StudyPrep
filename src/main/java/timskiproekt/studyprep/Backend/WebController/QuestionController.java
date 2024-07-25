@@ -3,8 +3,11 @@ package timskiproekt.studyprep.Backend.WebController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import timskiproekt.studyprep.Backend.Model.DTO.*;
-import timskiproekt.studyprep.Backend.Model.entities.*;
+import timskiproekt.studyprep.Backend.Model.DTO.BoolQuestionDto;
+import timskiproekt.studyprep.Backend.Model.DTO.MultipleChoiceQuestionDto;
+import timskiproekt.studyprep.Backend.Model.DTO.SingleChoiceQuestionDto;
+import timskiproekt.studyprep.Backend.Model.DTO.TextQuestionDto;
+import timskiproekt.studyprep.Backend.Model.entities.Question;
 import timskiproekt.studyprep.Backend.Service.QuestionService;
 
 import java.util.List;

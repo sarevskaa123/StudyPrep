@@ -14,6 +14,7 @@ const QuizEdit = () => {
     const [answerOptions, setAnswerOptions] = useState(['', '', '', '']);
     const [correctAnswer, setCorrectAnswer] = useState('');
     const [isCorrect, setIsCorrect] = useState([false, false, false, false]);
+    const [selectedFile, setSelectedFile] = useState(null);
 
     useEffect(() => {
         const fetchQuizDetails = async () => {
@@ -40,13 +41,32 @@ const QuizEdit = () => {
 
     const handleAddQuestion = async (e) => {
         e.preventDefault();
+
+        let base64Image = '';
+        if (selectedFile) {
+            const reader = new FileReader();
+            reader.readAsDataURL(selectedFile);
+            reader.onloadend = () => {
+                base64Image = reader.result.split(',')[1];
+                submitQuestion(base64Image);
+            };
+            reader.onerror = error => {
+                console.error('Error converting image to base64:', error);
+            };
+        } else {
+            submitQuestion(base64Image);
+        }
+    };
+
+    const submitQuestion = async (base64Image) => {
         const questionDto = {
             questionText,
             questionType,
             quizId,
             answerOptions,
             correctAnswer,
-            isCorrect
+            isCorrect,
+            image: base64Image
         };
 
         try {
@@ -57,19 +77,21 @@ const QuizEdit = () => {
             setAnswerOptions(['', '', '', '']);
             setCorrectAnswer('');
             setIsCorrect([false, false, false, false]);
+            setSelectedFile(null);
         } catch (error) {
             console.error(`Error adding ${questionType} question:`, error);
         }
     };
 
-    const handleDeleteQuestion = (questionId) => {
-        axios.delete(`/questions/delete/${questionId}`)
-            .then(() => {
-                setQuestions(questions.filter(q => q.questionId !== questionId));
-            })
-            .catch(error => {
-                console.error("There was an error deleting the question!", error);
-            });
+
+
+    const handleDeleteQuestion = async (questionId) => {
+        try {
+            await axios.delete(`/questions/delete/${questionId}`);
+            setQuestions(questions.filter(question => question.questionId !== questionId));
+        } catch (error) {
+            console.error('Error deleting question:', error);
+        }
     };
 
     return (
@@ -94,6 +116,10 @@ const QuizEdit = () => {
                         value={questionText}
                         onChange={(e) => setQuestionText(e.target.value)}
                     />
+                </div>
+                <div className="form-group">
+                    <label>Attach Image</label>
+                    <input type="file" onChange={(e) => setSelectedFile(e.target.files[0])} />
                 </div>
                 {(questionType === 'Single' || questionType === 'Multiple') && (
                     <div className="form-group">

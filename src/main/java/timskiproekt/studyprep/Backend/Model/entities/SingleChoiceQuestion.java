@@ -1,7 +1,6 @@
 package timskiproekt.studyprep.Backend.Model.entities;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,8 +17,8 @@ public class SingleChoiceQuestion extends Question {
     private String answerOption4;
     private String correctAnswer;
 
-    public SingleChoiceQuestion(String questionText, String answerOption1, String answerOption2, String answerOption3, String answerOption4, String correctAnswer, Quiz quiz) {
-        super(questionText, "Single", quiz);
+    public SingleChoiceQuestion(String questionText, String answerOption1, String answerOption2, String answerOption3, String answerOption4, String correctAnswer, Quiz quiz, byte[] image) {
+        super(questionText, "Single", quiz, image);
         this.answerOption1 = answerOption1;
         this.answerOption2 = answerOption2;
         this.answerOption3 = answerOption3;
@@ -30,4 +29,3 @@ public class SingleChoiceQuestion extends Question {
     public SingleChoiceQuestion() {
     }
 }
-

@@ -13,17 +13,17 @@ const QuizStart = () => {
     const [userAnswers, setUserAnswers] = useState([]);
     const [selectedAnswer, setSelectedAnswer] = useState([]);
     const [subjectId, setSubjectId] = useState(null);
-    const [quizFinished, setQuizFinished] = useState(false); // New state to track quiz completion
+    const [quizFinished, setQuizFinished] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchQuestions = async () => {
             try {
-                const response = await axios.get(`http://localhost:8081/api/questions/quiz/random/${quizId}?count=10`);
+                const response = await axios.get(`/questions/quiz/random/${quizId}?count=10`);
                 setQuestions(response.data);
                 setStartTime(new Date());
 
-                const quizResponse = await axios.get(`http://localhost:8081/api/quizzes/${quizId}`);
+                const quizResponse = await axios.get(`/api/quizzes/${quizId}`);
                 setSubjectId(quizResponse.data.subjectId.subjectId);
             } catch (error) {
                 console.error('Error fetching questions:', error);
@@ -37,7 +37,7 @@ const QuizStart = () => {
         if (quizFinished) {
             saveAttempt();
         }
-    }, [score, quizFinished]); // Run saveAttempt when score or quizFinished changes
+    }, [score, quizFinished]);
 
     const handleAnswerSelect = (index, isChecked) => {
         const updatedSelectedAnswer = [...selectedAnswer];
@@ -59,9 +59,8 @@ const QuizStart = () => {
 
             correctAnswer = correctAnswerOptions.join(', ');
         } else if (currentQuestion.questionType === 'Bool') {
-            const correctAnswerText = currentQuestion.correctAnswer.toString().toLowerCase();
-            isCorrect = selectedAnswer[0]?.toLowerCase() === correctAnswerText;
-            correctAnswer = correctAnswerText === 'true' ? 'True' : 'False';
+            isCorrect = selectedAnswer[0]?.toLowerCase() === currentQuestion.correctAnswer.toString().toLowerCase();
+            correctAnswer = currentQuestion.correctAnswer ? 'True' : 'False';
         } else {
             isCorrect = selectedAnswer[0] === currentQuestion.correctAnswer;
             correctAnswer = currentQuestion.correctAnswer;
@@ -72,12 +71,26 @@ const QuizStart = () => {
             : selectedAnswer[0];
 
         const updatedUserAnswers = [...userAnswers];
-        updatedUserAnswers[currentQuestionIndex] = { question: currentQuestion, isCorrect, userAnswer: userAnswerText, correctAnswer };
+        updatedUserAnswers[currentQuestionIndex] = { question: currentQuestion, isCorrect, userAnswer: userAnswerText, correctAnswer, selectedAnswer };
         setUserAnswers(updatedUserAnswers);
 
-        if (isCorrect) {
-            setScore(prevScore => prevScore + 1); // Update score correctly
+        // if (isCorrect) {
+        //     setScore(prevScore => prevScore + 1);
+        // }
+
+        if (!userAnswers[currentQuestionIndex]) {
+            if (isCorrect) {
+                setScore(prevScore => prevScore + 1);
+            }
+        } else if (userAnswers[currentQuestionIndex].isCorrect !== isCorrect) {
+            if (isCorrect) {
+                setScore(prevScore => prevScore + 1);
+            } else {
+                setScore(prevScore => prevScore - 1);
+            }
         }
+
+
 
         if (moveNext) {
             handleNextQuestion();
@@ -89,30 +102,20 @@ const QuizStart = () => {
     const handleNextQuestion = () => {
         if (currentQuestionIndex < questions.length - 1) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
-            const nextQuestion = questions[currentQuestionIndex + 1];
-            const nextAnswers = userAnswers[currentQuestionIndex + 1]?.userAnswer.split(', ') || [];
-            if (nextQuestion) {
-                setSelectedAnswer(nextQuestion.questionType === 'Multiple'
-                    ? nextAnswers.map(answer => nextQuestion.answerOptions?.includes(answer))
-                    : nextAnswers);
-            }
+            const nextAnswers = userAnswers[currentQuestionIndex + 1]?.selectedAnswer || [];
+            setSelectedAnswer(nextAnswers);
         } else {
             setEndTime(new Date());
             setShowResults(true);
-            setQuizFinished(true); // Mark the quiz as finished
+            setQuizFinished(true);
         }
     };
 
     const handlePreviousQuestion = () => {
         if (currentQuestionIndex > 0) {
             setCurrentQuestionIndex(currentQuestionIndex - 1);
-            const previousQuestion = questions[currentQuestionIndex - 1];
-            const previousAnswers = userAnswers[currentQuestionIndex - 1]?.userAnswer.split(', ') || [];
-            if (previousQuestion) {
-                setSelectedAnswer(previousQuestion.questionType === 'Multiple'
-                    ? previousAnswers.map(answer => previousQuestion.answerOptions?.includes(answer))
-                    : previousAnswers);
-            }
+            const previousAnswers = userAnswers[currentQuestionIndex - 1]?.selectedAnswer || [];
+            setSelectedAnswer(previousAnswers);
         }
     };
 
@@ -133,16 +136,17 @@ const QuizStart = () => {
         }
     };
 
+
     const handleQuitQuiz = () => {
         if (subjectId) {
             navigate(`/subjects/${subjectId}`);
         } else {
-            navigate('/'); // Fallback in case subjectId is not available
+            navigate('/');
         }
     };
 
     if (showResults) {
-        const timeTaken = (endTime - startTime) / 1000; // Time taken in seconds
+        const timeTaken = (endTime - startTime) / 1000;
         const incorrectAnswers = userAnswers.filter(answer => !answer.isCorrect);
 
         return (
@@ -158,7 +162,7 @@ const QuizStart = () => {
                         {incorrectAnswers.map((answer, index) => (
                             <li key={index}>
                                 <p><strong>Question:</strong> {answer.question.questionText}</p>
-                                <p><strong>Your Answer:</strong> {Array.isArray(answer.userAnswer) ? answer.userAnswer.filter(Boolean).join(', ') : answer.userAnswer}</p>
+                                <p><strong>Your Answer:</strong> {answer.userAnswer}</p>
                                 <p><strong>Correct Answer:</strong> {answer.correctAnswer}</p>
                             </li>
                         ))}
@@ -174,15 +178,18 @@ const QuizStart = () => {
     }
 
     const currentQuestion = questions[currentQuestionIndex];
-    const { questionText, questionType, answerOption1, answerOption2, answerOption3, answerOption4 } = currentQuestion;
+    const { questionText, questionType, answerOption1, answerOption2, answerOption3, answerOption4, image } = currentQuestion;
     const answerOptions = [answerOption1, answerOption2, answerOption3, answerOption4].filter(option => option !== undefined && option !== null && option !== '');
 
     const renderQuestion = () => {
+        const imageSrc = image && image.length > 0 ? `data:image/jpeg;base64,${image}` : null;
+
         switch (questionType) {
             case 'Multiple':
                 return (
                     <div>
                         <p>{questionText}</p>
+                        {imageSrc && <img src={imageSrc} alt="question" style={{ maxWidth: '100%', marginBottom: '10px' }} />}
                         {answerOptions.map((option, index) => (
                             <div key={index}>
                                 <input
@@ -201,6 +208,7 @@ const QuizStart = () => {
                 return (
                     <div>
                         <p>{questionText}</p>
+                        {imageSrc && <img src={imageSrc} alt="question" style={{ maxWidth: '100%', marginBottom: '10px' }} />}
                         {answerOptions.map((option, index) => (
                             <div key={index}>
                                 <input
@@ -221,6 +229,7 @@ const QuizStart = () => {
                 return (
                     <div>
                         <p>{questionText}</p>
+                        {imageSrc && <img src={imageSrc} alt="question" style={{ maxWidth: '100%', marginBottom: '10px' }} />}
                         <div>
                             <input
                                 type="radio"
@@ -249,6 +258,7 @@ const QuizStart = () => {
                 return (
                     <div>
                         <p>{questionText}</p>
+                        {imageSrc && <img src={imageSrc} alt="question" style={{ maxWidth: '100%', marginBottom: '10px' }} />}
                         <input
                             type="text"
                             value={selectedAnswer[0] || ''}

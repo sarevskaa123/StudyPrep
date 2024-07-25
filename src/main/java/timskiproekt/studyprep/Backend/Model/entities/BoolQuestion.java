@@ -13,8 +13,8 @@ import javax.persistence.Entity;
 public class BoolQuestion extends Question {
     private boolean correctAnswer;
 
-    public BoolQuestion(String questionText, boolean correctAnswer, Quiz quiz) {
-        super(questionText, "Bool", quiz);
+    public BoolQuestion(String questionText, boolean correctAnswer, Quiz quiz, byte[] image) {
+        super(questionText, "Bool", quiz, image);
         this.correctAnswer = correctAnswer;
     }
 

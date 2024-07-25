@@ -12,6 +12,8 @@ const QuestionEdit = () => {
     const [answerOptions, setAnswerOptions] = useState(['', '', '', '']);
     const [correctAnswer, setCorrectAnswer] = useState('');
     const [isCorrect, setIsCorrect] = useState([false, false, false, false]);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [currentImage, setCurrentImage] = useState(null);
 
     useEffect(() => {
         const fetchQuestionDetails = async () => {
@@ -22,6 +24,10 @@ const QuestionEdit = () => {
 
                 setQuestionText(question.questionText);
                 setQuestionType(question.questionType);
+
+                if (question.image) {
+                    setCurrentImage(`data:image/jpeg;base64,${question.image}`);
+                }
 
                 if (question.questionType === 'Single' || question.questionType === 'Multiple') {
                     setAnswerOptions([
@@ -54,13 +60,31 @@ const QuestionEdit = () => {
 
     const handleSave = async (e) => {
         e.preventDefault();
+
+        if (selectedFile) {
+            const reader = new FileReader();
+            reader.readAsDataURL(selectedFile);
+            reader.onloadend = () => {
+                const base64Image = reader.result.split(',')[1];
+                submitQuestion(base64Image);
+            };
+            reader.onerror = error => {
+                console.error('Error converting image to base64:', error);
+            };
+        } else {
+            submitQuestion(currentImage ? currentImage.split(',')[1] : undefined);
+        }
+    };
+
+    const submitQuestion = async (base64Image) => {
         const questionDto = {
             questionText,
             questionType,
             answerOptions,
             correctAnswer,
             isCorrect,
-            questionId
+            questionId,
+            image: base64Image
         };
 
         console.log('Saving question with data:', questionDto);
@@ -87,12 +111,11 @@ const QuestionEdit = () => {
 
         try {
             await axios.put(endpoint, questionDto);
-            navigate(-1); // Go back to the previous page
+            navigate(-1);
         } catch (error) {
             console.error('Error updating question:', error);
         }
     };
-
 
     return (
         <div className="question-edit-container">
@@ -105,6 +128,11 @@ const QuestionEdit = () => {
                         value={questionText}
                         onChange={(e) => setQuestionText(e.target.value)}
                     />
+                </div>
+                <div className="form-group">
+                    <label>Attach Image</label>
+                    <input type="file" onChange={(e) => setSelectedFile(e.target.files[0])} />
+                    {currentImage && <img src={currentImage} alt="current question" style={{maxWidth: '100%', marginTop: '10px'}} />}
                 </div>
                 {(questionType === 'Single' || questionType === 'Multiple') && (
                     <div className="form-group">

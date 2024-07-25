@@ -1,7 +1,6 @@
 package timskiproekt.studyprep.Backend.Model.entities;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,8 +20,8 @@ public class MultipleChoiceQuestion extends Question {
     private boolean isCorrect3;
     private boolean isCorrect4;
 
-    public MultipleChoiceQuestion(String questionText, String answerOption1, String answerOption2, String answerOption3, String answerOption4, boolean isCorrect1, boolean isCorrect2, boolean isCorrect3, boolean isCorrect4, Quiz quiz) {
-        super(questionText, "Multiple", quiz);
+    public MultipleChoiceQuestion(String questionText, String answerOption1, String answerOption2, String answerOption3, String answerOption4, boolean isCorrect1, boolean isCorrect2, boolean isCorrect3, boolean isCorrect4, Quiz quiz, byte[] image) {
+        super(questionText, "Multiple", quiz, image);
         this.answerOption1 = answerOption1;
         this.answerOption2 = answerOption2;
         this.answerOption3 = answerOption3;
@@ -36,4 +35,3 @@ public class MultipleChoiceQuestion extends Question {
     public MultipleChoiceQuestion() {
     }
 }
-

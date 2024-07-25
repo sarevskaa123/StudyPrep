@@ -10,6 +10,7 @@ import timskiproekt.studyprep.Backend.Repository.QuestionRepository;
 import timskiproekt.studyprep.Backend.Repository.QuizRepository;
 import timskiproekt.studyprep.Backend.Service.QuestionService;
 
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -21,11 +22,9 @@ public class QuestionServiceImpl implements QuestionService {
     private final QuizRepository quizRepository;
     private final QuestionRepository questionRepository;
 
-
     public QuestionServiceImpl(QuizRepository quizRepository, QuestionRepository questionRepository) {
         this.quizRepository = quizRepository;
         this.questionRepository = questionRepository;
-
     }
 
     @Override
@@ -39,18 +38,18 @@ public class QuestionServiceImpl implements QuestionService {
                 questionDto.answerOptions().get(2),
                 questionDto.answerOptions().get(3),
                 questionDto.correctAnswer(),
-                quiz
+                quiz,
+                questionDto.image()
         );
 
         return Optional.of(questionRepository.save(question));
     }
 
-
     @Override
     public Optional<Question> addMultipleQuestion(MultipleChoiceQuestionDto questionDto) {
         Quiz quiz = quizRepository.findById(questionDto.quizId())
                 .orElseThrow(() -> new RuntimeException("Quiz not found"));
-        Question question = new MultipleChoiceQuestion(
+        MultipleChoiceQuestion question = new MultipleChoiceQuestion(
                 questionDto.questionText(),
                 questionDto.answerOptions().get(0),
                 questionDto.answerOptions().get(1),
@@ -60,8 +59,10 @@ public class QuestionServiceImpl implements QuestionService {
                 questionDto.isCorrect().get(1),
                 questionDto.isCorrect().get(2),
                 questionDto.isCorrect().get(3),
-                quiz
+                quiz,
+                questionDto.image()
         );
+
         return Optional.of(questionRepository.save(question));
     }
 
@@ -72,22 +73,39 @@ public class QuestionServiceImpl implements QuestionService {
         BoolQuestion question = new BoolQuestion(
                 questionDto.questionText(),
                 questionDto.correctAnswer(),
-                quiz
+                quiz,
+                questionDto.image()
         );
+
         return Optional.of(questionRepository.save(question));
     }
 
     @Override
     public Optional<Question> addTextQuestion(TextQuestionDto questionDto) {
-        Quiz quiz = quizRepository.findById(questionDto.quizId())
-                .orElseThrow(() -> new RuntimeException("Quiz not found"));
+        byte[] imageBytes = null;
+        if (questionDto.image() != null && !questionDto.image().isEmpty()) {
+            imageBytes = Base64.getDecoder().decode(questionDto.image());
+        }
+
         TextQuestion question = new TextQuestion(
                 questionDto.questionText(),
                 questionDto.correctAnswer(),
-                quiz
+                null, // This will be set later
+                imageBytes
         );
-        return Optional.of(questionRepository.save(question));
+
+        Optional<Quiz> quizOpt = quizRepository.findById(questionDto.quizId());
+        if (quizOpt.isPresent()) {
+            question.setQuiz(quizOpt.get());
+            questionRepository.save(question);
+            return Optional.of(question);
+        } else {
+            return Optional.empty();
+        }
     }
+
+
+
 
     @Override
     public Question editSingleQuestion(SingleChoiceQuestionDto questionDto) {
@@ -102,6 +120,7 @@ public class QuestionServiceImpl implements QuestionService {
             singleChoiceQuestion.setAnswerOption3(questionDto.answerOptions().get(2));
             singleChoiceQuestion.setAnswerOption4(questionDto.answerOptions().get(3));
             singleChoiceQuestion.setCorrectAnswer(questionDto.correctAnswer());
+            singleChoiceQuestion.setImage(questionDto.image());
 
             questionRepository.save(singleChoiceQuestion);
 
@@ -109,7 +128,6 @@ public class QuestionServiceImpl implements QuestionService {
         }
 
         throw new RuntimeException("Question type not found");
-
     }
 
     @Override
@@ -128,6 +146,7 @@ public class QuestionServiceImpl implements QuestionService {
             multipleChoiceQuestion.setCorrect2(questionDto.isCorrect().get(1));
             multipleChoiceQuestion.setCorrect3(questionDto.isCorrect().get(2));
             multipleChoiceQuestion.setCorrect4(questionDto.isCorrect().get(3));
+            multipleChoiceQuestion.setImage(questionDto.image());
 
             questionRepository.save(multipleChoiceQuestion);
 
@@ -146,6 +165,7 @@ public class QuestionServiceImpl implements QuestionService {
         if (question instanceof BoolQuestion boolQuestion) {
             boolQuestion.setQuestionText(questionDto.questionText());
             boolQuestion.setCorrectAnswer(questionDto.correctAnswer());
+            boolQuestion.setImage(questionDto.image());
 
             questionRepository.save(boolQuestion);
 
@@ -164,6 +184,12 @@ public class QuestionServiceImpl implements QuestionService {
         if (question instanceof TextQuestion textQuestion) {
             textQuestion.setQuestionText(questionDto.questionText());
             textQuestion.setCorrectAnswer(questionDto.correctAnswer());
+
+            byte[] imageBytes = null;
+            if (questionDto.image() != null && !questionDto.image().isEmpty()) {
+                imageBytes = Base64.getDecoder().decode(questionDto.image());
+            }
+            textQuestion.setImage(imageBytes);
 
             questionRepository.save(textQuestion);
 
@@ -193,7 +219,6 @@ public class QuestionServiceImpl implements QuestionService {
         return questionRepository.findById(questionId);
     }
 
-
     @Override
     public void deleteQuestionById(int questionId) {
         questionRepository.deleteById(questionId);
@@ -206,6 +231,3 @@ public class QuestionServiceImpl implements QuestionService {
         return questions.stream().limit(count).collect(Collectors.toList());
     }
 }
-
-
-

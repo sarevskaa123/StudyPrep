@@ -10,7 +10,6 @@ import timskiproekt.studyprep.Backend.Repository.QuestionRepository;
 import timskiproekt.studyprep.Backend.Repository.QuizRepository;
 import timskiproekt.studyprep.Backend.Service.QuestionService;
 
-import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -82,16 +81,11 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public Optional<Question> addTextQuestion(TextQuestionDto questionDto) {
-        byte[] imageBytes = null;
-        if (questionDto.image() != null && !questionDto.image().isEmpty()) {
-            imageBytes = Base64.getDecoder().decode(questionDto.image());
-        }
-
         TextQuestion question = new TextQuestion(
                 questionDto.questionText(),
                 questionDto.correctAnswer(),
                 null, // This will be set later
-                imageBytes
+                questionDto.image()
         );
 
         Optional<Quiz> quizOpt = quizRepository.findById(questionDto.quizId());
@@ -105,98 +99,95 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
 
-
-
     @Override
     public Question editSingleQuestion(SingleChoiceQuestionDto questionDto) {
-        Question question = questionRepository.findById(questionDto.questionId()).orElseThrow(
+        Question oldQuestion = questionRepository.findById(questionDto.questionId()).orElseThrow(
                 () -> new RuntimeException("Question not found")
         );
 
-        if (question instanceof SingleChoiceQuestion singleChoiceQuestion) {
-            singleChoiceQuestion.setQuestionText(questionDto.questionText());
-            singleChoiceQuestion.setAnswerOption1(questionDto.answerOptions().get(0));
-            singleChoiceQuestion.setAnswerOption2(questionDto.answerOptions().get(1));
-            singleChoiceQuestion.setAnswerOption3(questionDto.answerOptions().get(2));
-            singleChoiceQuestion.setAnswerOption4(questionDto.answerOptions().get(3));
-            singleChoiceQuestion.setCorrectAnswer(questionDto.correctAnswer());
-            singleChoiceQuestion.setImage(questionDto.image());
+        SingleChoiceQuestion question = new SingleChoiceQuestion(
+                questionDto.questionText(),
+                questionDto.answerOptions().get(0),
+                questionDto.answerOptions().get(1),
+                questionDto.answerOptions().get(2),
+                questionDto.answerOptions().get(3),
+                questionDto.correctAnswer(),
+                oldQuestion.getQuiz(),
+                questionDto.image()
+        );
 
-            questionRepository.save(singleChoiceQuestion);
+        oldQuestion.setQuiz(null);
+        questionRepository.save(oldQuestion);
+        questionRepository.save(question);
 
-            return singleChoiceQuestion;
-        }
-
-        throw new RuntimeException("Question type not found");
+        return question;
     }
 
     @Override
     public Question editMultipleQuestion(MultipleChoiceQuestionDto questionDto) {
-        Question question = questionRepository.findById(questionDto.questionId()).orElseThrow(
+        Question oldQuestion = questionRepository.findById(questionDto.questionId()).orElseThrow(
                 () -> new RuntimeException("Question not found")
         );
 
-        if (question instanceof MultipleChoiceQuestion multipleChoiceQuestion) {
-            multipleChoiceQuestion.setQuestionText(questionDto.questionText());
-            multipleChoiceQuestion.setAnswerOption1(questionDto.answerOptions().get(0));
-            multipleChoiceQuestion.setAnswerOption2(questionDto.answerOptions().get(1));
-            multipleChoiceQuestion.setAnswerOption3(questionDto.answerOptions().get(2));
-            multipleChoiceQuestion.setAnswerOption4(questionDto.answerOptions().get(3));
-            multipleChoiceQuestion.setCorrect1(questionDto.isCorrect().get(0));
-            multipleChoiceQuestion.setCorrect2(questionDto.isCorrect().get(1));
-            multipleChoiceQuestion.setCorrect3(questionDto.isCorrect().get(2));
-            multipleChoiceQuestion.setCorrect4(questionDto.isCorrect().get(3));
-            multipleChoiceQuestion.setImage(questionDto.image());
+        MultipleChoiceQuestion question = new MultipleChoiceQuestion(
+                questionDto.questionText(),
+                questionDto.answerOptions().get(0),
+                questionDto.answerOptions().get(1),
+                questionDto.answerOptions().get(2),
+                questionDto.answerOptions().get(3),
+                questionDto.isCorrect().get(0),
+                questionDto.isCorrect().get(1),
+                questionDto.isCorrect().get(2),
+                questionDto.isCorrect().get(3),
+                oldQuestion.getQuiz(),
+                questionDto.image()
+        );
 
-            questionRepository.save(multipleChoiceQuestion);
+        oldQuestion.setQuiz(null);
+        questionRepository.save(oldQuestion);
+        questionRepository.save(question);
 
-            return multipleChoiceQuestion;
-        }
-
-        throw new RuntimeException("Question type not found");
+        return question;
     }
 
     @Override
     public Question editBoolQuestion(BoolQuestionDto questionDto) {
-        Question question = questionRepository.findById(questionDto.questionId()).orElseThrow(
+        Question oldQuestion = questionRepository.findById(questionDto.questionId()).orElseThrow(
                 () -> new RuntimeException("Question not found")
         );
 
-        if (question instanceof BoolQuestion boolQuestion) {
-            boolQuestion.setQuestionText(questionDto.questionText());
-            boolQuestion.setCorrectAnswer(questionDto.correctAnswer());
-            boolQuestion.setImage(questionDto.image());
+        BoolQuestion question = new BoolQuestion(
+                questionDto.questionText(),
+                questionDto.correctAnswer(),
+                oldQuestion.getQuiz(),
+                questionDto.image()
+        );
 
-            questionRepository.save(boolQuestion);
+        oldQuestion.setQuiz(null);
+        questionRepository.save(oldQuestion);
+        questionRepository.save(question);
 
-            return boolQuestion;
-        }
-
-        throw new RuntimeException("Question type not found");
+        return question;
     }
 
     @Override
     public Question editTextQuestion(TextQuestionDto questionDto) {
-        Question question = questionRepository.findById(questionDto.questionId()).orElseThrow(
+        Question oldQuestion = questionRepository.findById(questionDto.questionId()).orElseThrow(
                 () -> new RuntimeException("Question not found")
         );
 
-        if (question instanceof TextQuestion textQuestion) {
-            textQuestion.setQuestionText(questionDto.questionText());
-            textQuestion.setCorrectAnswer(questionDto.correctAnswer());
+        TextQuestion question = new TextQuestion(
+                questionDto.questionText(),
+                questionDto.correctAnswer(),
+                oldQuestion.getQuiz(),
+                questionDto.image()
+        );
 
-            byte[] imageBytes = null;
-            if (questionDto.image() != null && !questionDto.image().isEmpty()) {
-                imageBytes = Base64.getDecoder().decode(questionDto.image());
-            }
-            textQuestion.setImage(imageBytes);
+        oldQuestion.setQuiz(null);
+        questionRepository.save(oldQuestion);
+        questionRepository.save(question);
 
-            questionRepository.save(textQuestion);
-
-            return textQuestion;
-        }
-
-        throw new RuntimeException("Question type not found");
+        return question;
     }
 
     @Override

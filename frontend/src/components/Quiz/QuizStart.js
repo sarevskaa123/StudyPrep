@@ -74,10 +74,6 @@ const QuizStart = () => {
         updatedUserAnswers[currentQuestionIndex] = { question: currentQuestion, isCorrect, userAnswer: userAnswerText, correctAnswer, selectedAnswer };
         setUserAnswers(updatedUserAnswers);
 
-        // if (isCorrect) {
-        //     setScore(prevScore => prevScore + 1);
-        // }
-
         if (!userAnswers[currentQuestionIndex]) {
             if (isCorrect) {
                 setScore(prevScore => prevScore + 1);
@@ -89,8 +85,6 @@ const QuizStart = () => {
                 setScore(prevScore => prevScore - 1);
             }
         }
-
-
 
         if (moveNext) {
             handleNextQuestion();
@@ -121,12 +115,22 @@ const QuizStart = () => {
 
     const saveAttempt = async () => {
         const userId = localStorage.getItem('UserId'); // Get the user ID from local storage
+        const questionAttempts = userAnswers.map((answer) => {
+            console.log('Answer:', answer); // Debugging log
+            return {
+                questionId: answer.question.questionId,
+                userAnswers: answer.userAnswer ? answer.userAnswer.split(',').map(part => part.trim()) : [],
+                isCorrect: answer.isCorrect,
+                points: answer.isCorrect ? 1 : 0
+            };
+        });
         const attemptData = {
             startTime,
             finishTime: new Date(),
             finalResult: score,
             user: { userId: userId }, // Use the stored user ID
-            quiz: { quizId: quizId }
+            quiz: { quizId: quizId },
+            historyQuiz: questionAttempts
         };
 
         try {
@@ -135,7 +139,6 @@ const QuizStart = () => {
             console.error('Error saving attempt:', error);
         }
     };
-
 
     const handleQuitQuiz = () => {
         if (subjectId) {

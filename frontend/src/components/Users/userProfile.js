@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const UserInfo = () => {
     const [userInfo, setUserInfo] = useState(null);
@@ -66,7 +67,7 @@ const UserInfo = () => {
                         {userInfo.attempts && userInfo.attempts.length > 0 ? (
                             userInfo.attempts.map(attempt => (
                                 <tr key={attempt.attemptId}>
-                                    <td style={thTdStyle}>{attempt.quiz?.quizTitle || 'N/A'}</td>
+                                    <td style={thTdStyle}><Link to={`/attempt/${attempt.attemptId}`}>{attempt.quiz?.quizTitle || 'N/A'}</Link></td>
                                     <td style={thTdStyle}>{attempt.quiz?.subject?.subjectName || 'N/A'}</td>
                                     <td style={thTdStyle}>{attempt.startTime ? new Date(attempt.startTime).toLocaleString() : 'N/A'}</td>
                                     <td style={thTdStyle}>{attempt.finishTime ? new Date(attempt.finishTime).toLocaleString() : 'N/A'}</td>

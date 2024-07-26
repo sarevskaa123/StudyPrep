@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Header from "../Header/header";
 import QuizAdd from "../Quiz/QuizAdd";
@@ -12,11 +12,11 @@ import Register from "../Users/Register";
 import Login from "../Users/Login";
 import StudyPrepService from "../../repository/StudyPrepRepository";
 import Home from "../Home/Home";
-import UserInfo from "../Users/userProfile"
-import Leaderboard from "../Users/Leaderboard"
+import UserInfo from "../Users/userProfile";
+import AttemptDetails from "../Users/AttemptDetails";
+import Leaderboard from "../Users/Leaderboard";
 import QuizStart from '../Quiz/QuizStart';
-
-import axios from "../../custom-axios/axios";
+import axios from 'axios'; // Add this import statement
 
 class App extends Component {
     constructor(props) {
@@ -26,7 +26,7 @@ class App extends Component {
             subjects: [],
             selectedQuiz: {},
             user: {},
-            userInfo:[],
+            userInfo: [],
             quizQuestions: []
         }
     }
@@ -35,7 +35,6 @@ class App extends Component {
         try {
             const response = await fetch(`/api/subjects/${subjectId}`);
             const text = await response.text();
-            console.log("fetchSubjectDetails response text:", text); // Log response text
             if (!response.ok) {
                 throw new Error(`Error: ${response.statusText}`);
             }
@@ -49,12 +48,8 @@ class App extends Component {
     addQuizToSubject = async (subjectId, quizData) => {
         try {
             const endpoint = `/quizzes/${subjectId}/add`;
-            console.log("addQuizToSubject endpoint:", endpoint); // Log the endpoint
-            const response = await axios.post(endpoint, {
-                quizTitle: quizData
-            });
+            const response = await axios.post(endpoint, { quizTitle: quizData });
             const text = await response.text();
-            console.log("addQuizToSubject response text:", text); // Log response text
             if (!response.ok) {
                 throw new Error(`Error: ${response.statusText}`);
             }
@@ -73,39 +68,27 @@ class App extends Component {
                     <div className={"container"}>
                         <Routes>
                             <Route path={"/addQuiz"} element={
-                                <QuizAdd subject={this.state.subjects}
-                                         user={this.state.user}
-                                         onAddQuiz={this.addQuiz}/>}/>
+                                <QuizAdd subject={this.state.subjects} user={this.state.user} onAddQuiz={this.addQuiz} />} />
                             <Route path={"/editQuiz/:id"} element={
                                 <QuizEdit subject={this.state.subjects} onEditQuiz={this.editQuiz}
-                                          quiz={this.state.selectedQuiz}
-                                          user={this.state.user}/>}/>
-                            <Route path={"/quizzes/edit/:quizId"} element={
-                                <QuizEdit onEditQuiz={this.editQuiz} />
-                            } />
-                            <Route path={"/admin"} element={<Quizzes quizzes={this.state.quizzes}
-                                                                     user={this.state.user}
-                                                                     onDelete={this.deleteQuiz}
-                                                                     onEdit={this.getQuiz}
-                                                                     onView={this.loadQuestionsForQuiz}
-                            />}/>
-
-                            <Route path={"/profile"} element={<UserInfo quizzes={this.state.quizzes} />}/>
+                                          quiz={this.state.selectedQuiz} user={this.state.user} />} />
+                            <Route path={"/quizzes/edit/:quizId"} element={<QuizEdit onEditQuiz={this.editQuiz} />} />
+                            <Route path={"/admin"} element={<Quizzes quizzes={this.state.quizzes} user={this.state.user}
+                                                                     onDelete={this.deleteQuiz} onEdit={this.getQuiz} onView={this.loadQuestionsForQuiz} />} />
+                            <Route path={"/profile"} element={<UserInfo quizzes={this.state.quizzes} />} />
                             <Route path="/subjects" element={<Subject />} />
                             <Route path="/subjects/:subjectId" element={
-                                <SubjectDetail
-                                    fetchSubjectDetails={this.fetchSubjectDetails}
-                                    addQuizToSubject={this.addQuizToSubject}
-                                />
-                            } />
+                                <SubjectDetail fetchSubjectDetails={this.fetchSubjectDetails} addQuizToSubject={this.addQuizToSubject} />} />
                             <Route path="/quizzes" element={<Quizzes />} />
-                            <Route path="/leaderboard" element={<Leaderboard quizzes={this.state.quizzes}/>}/>
-                            <Route path={"/login"} element={<Login onLogin={this.fetchData}/>}/>
-                            <Route path={"/register"} element={<Register onRegister={this.fetchData}/>}/>
-                            <Route path={"/"} element={<Home user={this.state.user}/>}/>
+                            <Route path="/leaderboard" element={<Leaderboard quizzes={this.state.quizzes} />} />
+                            <Route path={"/login"} element={<Login onLogin={this.fetchData} />} />
+                            <Route path={"/register"} element={<Register onRegister={this.fetchData} />} />
+                            <Route path={"/"} element={<Home user={this.state.user} />} />
                             <Route path="/questions/edit/:questionId" element={<QuestionEdit />} />
+                            <Route path="/attempt/:attemptId" element={<AttemptDetails />} />
                             <Route path="/leaderboardQuiz/:quizId" element={<LeaderboardQuiz />} />
-                            <Route path="/quizzes/start/:quizId" element={<QuizStart />} />                        </Routes>
+                            <Route path="/quizzes/start/:quizId" element={<QuizStart />} />
+                        </Routes>
                     </div>
                 </main>
             </Router>
@@ -128,18 +111,18 @@ class App extends Component {
         });
     }
 
-    loadQuestions=()=>{
-        StudyPrepService.fetchQuestions().then((data)=>{
+    loadQuestions = () => {
+        StudyPrepService.fetchQuestions().then((data) => {
             this.setState({
-                quizQuestions:data.data
+                quizQuestions: data.data
             })
         })
     }
 
-    getUserInfo=(id)=>{
-        StudyPrepService.getUserInfo(id).then((data)=>{
+    getUserInfo = (id) => {
+        StudyPrepService.getUserInfo(id).then((data) => {
             this.setState({
-                userInfo : data.data
+                userInfo: data.data
             })
         })
     }
@@ -178,38 +161,33 @@ class App extends Component {
     }
 
     editQuiz = (id, quizTitle, quizDescription, subject) => {
-        StudyPrepService.editQuiz(id, quizTitle, quizDescription, subject)
-            .then(() => {
-                this.loadQuizzes();
-            })
+        StudyPrepService.editQuiz(id, quizTitle, quizDescription, subject).then(() => {
+            this.loadQuizzes();
+        })
     }
 
     questionSingleCreate = (questionText, quizId, answer1, answer2, answer3, answer4, answerCorrect) => {
-        StudyPrepService.createSingleQuestion(questionText, quizId, answer1, answer2, answer3, answer4, answerCorrect)
-            .then(() => {
-                this.loadQuizzes();
-            })
+        StudyPrepService.createSingleQuestion(questionText, quizId, answer1, answer2, answer3, answer4, answerCorrect).then(() => {
+            this.loadQuizzes();
+        })
     }
 
     questionMultipleCreate = (questionText, quizId, answer1, answer2, answer3, answer4, checked1, checked2, checked3, checked4) => {
-        StudyPrepService.createMultipleQuestion(questionText, quizId, answer1, answer2, answer3, answer4, checked1, checked2, checked3, checked4)
-            .then(() => {
-                this.loadQuizzes();
-            })
+        StudyPrepService.createMultipleQuestion(questionText, quizId, answer1, answer2, answer3, answer4, checked1, checked2, checked3, checked4).then(() => {
+            this.loadQuizzes();
+        })
     }
 
     questionBoolCreate = (questionText, quizId, isCorrect) => {
-        StudyPrepService.createBoolQuestion(questionText, quizId, isCorrect)
-            .then(() => {
-                this.loadQuizzes();
-            })
+        StudyPrepService.createBoolQuestion(questionText, quizId, isCorrect).then(() => {
+            this.loadQuizzes();
+        })
     }
 
     questionTextCreate = (questionText, answerText, quizId) => {
-        StudyPrepService.createTextQuestion(questionText, answerText, quizId)
-            .then(() => {
-                this.loadQuizzes();
-            })
+        StudyPrepService.createTextQuestion(questionText, answerText, quizId).then(() => {
+            this.loadQuizzes();
+        })
     }
 
     fetchData = () => {

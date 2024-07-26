@@ -11,9 +11,9 @@ import javax.persistence.Entity;
 @Entity
 @AllArgsConstructor
 public class BoolQuestion extends Question {
-    private boolean correctAnswer;
+    private Boolean correctAnswer;
 
-    public BoolQuestion(String questionText, boolean correctAnswer, Quiz quiz, byte[] image) {
+    public BoolQuestion(String questionText, Boolean correctAnswer, Quiz quiz, byte[] image) {
         super(questionText, "Bool", quiz, image);
         this.correctAnswer = correctAnswer;
     }

@@ -1,18 +1,23 @@
 // src/components/Header/Header.js
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
 
 const Header = () => {
+    const navigate = useNavigate();
+
     let authenticate;
     if (localStorage.getItem("Username")) {
         authenticate = (
             <div>
                 <Link className="btn btn-outline-info my-2 my-sm-0" to="/profile" >Profile</Link>
                 <button className="btn btn-outline-info my-2 my-sm-0" onClick={() => {
-                    localStorage.removeItem("Username");
-                    localStorage.removeItem("Email");
-                    localStorage.removeItem("Userrole");
-                    localStorage.removeItem("UserId");
+                    //localStorage.removeItem("Username");
+                    //localStorage.removeItem("Email");
+                    //localStorage.removeItem("Userrole");
+                    //localStorage.removeItem("UserId");
+                    localStorage.clear()
+                    navigate("/");
                     window.location.reload();
                 }}>Logout
                 </button>

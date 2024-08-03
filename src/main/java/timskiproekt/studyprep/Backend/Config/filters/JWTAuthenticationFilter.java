@@ -11,15 +11,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import timskiproekt.studyprep.Backend.Config.JWTAuthConstants;
 import timskiproekt.studyprep.Backend.Model.DTO.UserDetailsDto;
 import timskiproekt.studyprep.Backend.Model.entities.User;
-import timskiproekt.studyprep.Backend.Model.exceptions.PasswordsDoNotMatchException;
+import timskiproekt.studyprep.Backend.Model.exceptions.InternalStateException;
+import timskiproekt.studyprep.Backend.Model.exceptions.InvalidUserCredentialsException;
 
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -29,7 +30,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
 
     private final AuthenticationManager authenticationManager;
-    private  final UserDetailsService userDetailsService;
+    private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
 
     public JWTAuthenticationFilter(AuthenticationManager authenticationManager, UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
@@ -42,35 +43,45 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-        User creds = null;
+        User creds;
+
         try {
-            creds = new ObjectMapper().readValue(request.getInputStream(),User.class);
+            creds = new ObjectMapper().readValue(request.getInputStream(), User.class);
+        } catch (IOException e) {
+            throw new InternalStateException(e.getMessage());
         }
-        catch (IOException e){
-            e.printStackTrace();
-        }
-        if(creds == null){
+
+        if (creds == null) {
             //throw new UsernameNotFoundException("Invalid credentials!");
             return super.attemptAuthentication(request, response);
         }
-        UserDetails userDetails = userDetailsService.loadUserByUsername(creds.getUsername());
-        if (!passwordEncoder.matches(creds.getPassword(),userDetails.getPassword())){
-            throw new PasswordsDoNotMatchException();
+
+        UserDetails userDetails;
+
+        try {
+            userDetails = userDetailsService.loadUserByUsername(creds.getUsername());
+        } catch (UsernameNotFoundException e) {
+            throw new InvalidUserCredentialsException();
         }
+
+        if (!passwordEncoder.matches(creds.getPassword(), userDetails.getPassword())) {
+            throw new InvalidUserCredentialsException();
+        }
+
         return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDetails.getUsername(),
-                userDetails.getPassword(),userDetails.getAuthorities()));
+                userDetails.getPassword(), userDetails.getAuthorities()));
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException {
         User userDetails = (User) authResult.getPrincipal();
         String token = JWT.create()
                 .withSubject(new ObjectMapper().writeValueAsString(UserDetailsDto.of(userDetails)))
-                .withExpiresAt(new Date(System.currentTimeMillis()+ JWTAuthConstants.EXPIRATION_TIME))
+                .withExpiresAt(new Date(System.currentTimeMillis() + JWTAuthConstants.EXPIRATION_TIME))
                 .sign(Algorithm.HMAC256(JWTAuthConstants.SECRET));
-        response.addHeader(JWTAuthConstants.HEADER_STRING,JWTAuthConstants.TOKEN_PREFIX+token);
+        response.addHeader(JWTAuthConstants.HEADER_STRING, JWTAuthConstants.TOKEN_PREFIX + token);
         response.getWriter().append(token);
-     }
+    }
 
     public String generateJwt(HttpServletResponse response, Authentication authResult) throws JsonProcessingException {
         User userDetails = (User) authResult.getPrincipal();

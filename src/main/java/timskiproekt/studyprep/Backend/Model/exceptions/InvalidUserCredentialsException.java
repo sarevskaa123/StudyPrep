@@ -1,8 +1,8 @@
 package timskiproekt.studyprep.Backend.Model.exceptions;
 
-public class InvalidUserCredentialsException extends RuntimeException {
+public class InvalidUserCredentialsException extends UserException {
 
     public InvalidUserCredentialsException() {
-        super("Invalid user credentials exception");
+        super("Invalid username or password");
     }
 }

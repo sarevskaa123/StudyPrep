@@ -5,11 +5,12 @@ import { Container, Box, TextField, Button, Typography, Paper } from '@mui/mater
 import logo from './login.png'; // Ensure this path is correct
 
 const Login = (props) => {
-    const history = useNavigate();
+    const navigate = useNavigate();
     const [formData, updateFormData] = React.useState({
         username: "",
         password: ""
     });
+    const [errorMessage, setErrorMessage] = React.useState("");
 
     const handleChange = (e) => {
         updateFormData({
@@ -20,15 +21,23 @@ const Login = (props) => {
 
     const onFormSubmit = (e) => {
         e.preventDefault();
-        StudyPrepService.login(formData.username, formData.password).then(resp => {
-            console.log(resp.data);
-            localStorage.setItem("UserId", resp.data.userId);
-            localStorage.setItem("Username", resp.data.username);
-            localStorage.setItem("Email", resp.data.email);
-            localStorage.setItem("Userrole", resp.data.userRole);
-            props.onLogin();
-            history("/subjects");
-        });
+        StudyPrepService.login(formData.username, formData.password)
+            .then(resp => {
+                console.log(resp.data);
+                localStorage.setItem("UserId", resp.data.userId);
+                localStorage.setItem("Username", resp.data.username);
+                localStorage.setItem("Email", resp.data.email);
+                localStorage.setItem("Userrole", resp.data.userRole);
+                props.onLogin();
+                navigate("/subjects");
+            })
+            .catch((error) => {
+                if (error.response && (error.response.status === 400)) {
+                    setErrorMessage(error.response.data.message);
+                } else {
+                    setErrorMessage("We're sorry, a problem occurred with us :( Please be patient. <3");
+                }
+            });
     };
 
     return (
@@ -40,6 +49,11 @@ const Login = (props) => {
                 <Typography variant="h5" component="h1" gutterBottom textAlign="center">
                     Login
                 </Typography>
+                {errorMessage && (
+                    <Typography variant="body1" color="error" textAlign="center" gutterBottom>
+                        {errorMessage}
+                    </Typography>
+                )}
                 <form onSubmit={onFormSubmit}>
                     <TextField
                         label="Username"

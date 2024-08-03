@@ -1,6 +1,12 @@
+// src/components/Subject/SubjectDetail.js
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from "../../custom-axios/axios";
+import { Container, Typography, TextField, Button, Card, CardContent, IconButton, Box } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import AddIcon from '@mui/icons-material/Add';
 
 const SubjectDetail = () => {
     const { subjectId } = useParams();
@@ -55,36 +61,50 @@ const SubjectDetail = () => {
     };
 
     return (
-        <div>
-            {subject ? <h1>{subject.subjectName}</h1> : <h1>Loading...</h1>}
-            <form onSubmit={handleAddQuiz}>
-                <input
-                    type="text"
-                    placeholder="Enter new quiz name"
+        <Container maxWidth="md">
+            <Typography variant="h4" component="div" gutterBottom>
+                {subject ? subject.subjectName : 'Loading...'}
+            </Typography>
+            <Box component="form" onSubmit={handleAddQuiz} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <TextField
+                    variant="outlined"
+                    label="Enter new quiz name"
                     value={newQuizName}
                     onChange={(e) => setNewQuizName(e.target.value)}
+                    fullWidth
+                    sx={{ mr: 2 }}
                 />
-                <button type="submit">Add Quiz</button>
-            </form>
-            <ul>
+                <Button type="submit" variant="contained" color="primary" endIcon={<AddIcon />}>
+                    Add Quiz
+                </Button>
+            </Box>
+            <Box sx={{ display: 'grid', gap: 2 }}>
                 {Array.isArray(quizzes) && quizzes.length > 0 ? (
                     quizzes.map((quiz) => (
-                        <li key={quiz.quizId}>
-                            {quiz.quizTitle}
-                            <button onClick={() => handleDeleteQuiz(quiz.quizId)}>Delete</button>
-                            <Link to={`/quizzes/edit/${quiz.quizId}`}>
-                                <button>Edit</button>
-                            </Link>
-                            <Link to={`/quizzes/start/${quiz.quizId}`}>
-                                <button>Start Quiz</button>
-                            </Link>
-                        </li>
+                        <Card key={quiz.quizId} variant="outlined">
+                            <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <Typography variant="h6">
+                                    {quiz.quizTitle}
+                                </Typography>
+                                <Box>
+                                    <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteQuiz(quiz.quizId)}>
+                                        <DeleteIcon />
+                                    </IconButton>
+                                    <IconButton edge="end" component={Link} to={`/quizzes/edit/${quiz.quizId}`}>
+                                        <EditIcon />
+                                    </IconButton>
+                                    <IconButton edge="end" component={Link} to={`/quizzes/start/${quiz.quizId}`}>
+                                        <PlayArrowIcon />
+                                    </IconButton>
+                                </Box>
+                            </CardContent>
+                        </Card>
                     ))
                 ) : (
-                    <li>No quizzes available</li>
+                    <Typography variant="body1" color="text.secondary">No quizzes available</Typography>
                 )}
-            </ul>
-        </div>
+            </Box>
+        </Container>
     );
 };
 

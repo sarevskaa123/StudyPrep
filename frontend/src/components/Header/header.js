@@ -1,79 +1,51 @@
-// src/components/Header/Header.js
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+import Box from '@mui/material/Box';
 
 const Header = () => {
     const navigate = useNavigate();
 
-    let authenticate;
-    if (localStorage.getItem("Username")) {
-        authenticate = (
-            <div>
-                <Link className="btn btn-outline-info my-2 my-sm-0" to="/profile" >Profile</Link>
-                <button className="btn btn-outline-info my-2 my-sm-0" onClick={() => {
-                    //localStorage.removeItem("Username");
-                    //localStorage.removeItem("Email");
-                    //localStorage.removeItem("Userrole");
-                    //localStorage.removeItem("UserId");
-                    localStorage.clear()
-                    navigate("/");
-                    window.location.reload();
-                }}>Logout
-                </button>
-            </div>
-        );
-    } else {
-        authenticate = (
-            <div>
-                <Link className="btn btn-outline-info my-2 my-sm-0"  to="/login">Login</Link>
-                <Link className="btn btn-outline-info my-2 my-sm-0" to="/register" >Register</Link>
-            </div>
-        );
-    }
+    const handleLogout = () => {
+        localStorage.clear();
+        navigate("/login");
+        window.location.reload();
+    };
 
-    // let admin;
-    // if (localStorage.getItem("Userrole") === "ADMIN") {
-    //     admin = (
-    //         <li className="nav-item active">
-    //             <Link className="nav-link" to="/admin">Admin</Link>
-    //         </li>
-    //     );
-    // }
-
-    let subjects;
-    if (localStorage.getItem("Userrole") === "ADMIN") {
-        subjects = (
-            <li className="nav-item">
-                <Link className="nav-link" to="/subjects">Subjects</Link>
-            </li>
-        );
-    }
+    const authenticate = localStorage.getItem("Username") ? (
+        <Box display="flex" alignItems="center">
+            <Button color="inherit" component={Link} to="/subjects">Subjects</Button>
+            <Button color="inherit" component={Link} to="/leaderboard">Leaderboard</Button>
+            <Button color="inherit" component={Link} to="/profile">Profile</Button>
+            <Button color="inherit" onClick={handleLogout}>Logout</Button>
+        </Box>
+    ) : (
+        <Box display="flex" alignItems="center">
+            <Button color="inherit" component={Link} to="/login">Login</Button>
+            <Button color="inherit" component={Link} to="/register">Register</Button>
+        </Box>
+    );
 
     return (
-        <header>
-            <nav className="navbar navbar-expand-md navbar-dark navbar-fixed bg-dark">
-                <a className="navbar-brand" href="/">Study prep</a>
-                <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
-                        aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-                    <span className="navbar-toggler-icon"></span>
-                </button>
-                <div className="collapse navbar-collapse" id="navbarCollapse">
-                    <ul className="navbar-nav mr-auto">
-                        {subjects}
-                        <li className="nav-item">
-                            <Link className="nav-link" to="/subjects">Subjects</Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link className="nav-link" to="/leaderboard">Leaderboard</Link>
-                        </li>
-                        {/*{admin}*/}
-                    </ul>
+        <AppBar position="static">
+            <Toolbar>
+                <IconButton edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
+                    <MenuIcon />
+                </IconButton>
+                <Typography variant="h6" sx={{ flexGrow: 1 }} component={Link} to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    Study Prep
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     {authenticate}
-                </div>
-            </nav>
-        </header>
+                </Box>
+            </Toolbar>
+        </AppBar>
     );
-}
+};
 
 export default Header;

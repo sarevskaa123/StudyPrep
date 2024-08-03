@@ -9,7 +9,5 @@ import java.util.Optional;
 public interface UserService extends UserDetailsService {
     Optional<User> findById(int id);
 
-    Optional<User> register(RegisterDTO registerDTO);
-
-    User findByUsername(String username);
+    User register(RegisterDTO registerDTO);
 }

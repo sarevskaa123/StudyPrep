@@ -1,6 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useParams } from "react-router-dom";
+import {
+    Container,
+    Typography,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    Button,
+    Box,
+    CircularProgress
+} from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const LeaderboardQuiz = () => {
     const { quizId } = useParams();
@@ -26,46 +41,13 @@ const LeaderboardQuiz = () => {
         fetchLeaderboardInfo();
     }, [quizId]);
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return (
+        <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" height="100vh">
+            <CircularProgress />
+            <Typography variant="h6" component="div" mt={2}>Loading...</Typography>
+        </Box>
+    );
     if (error) return <div>Error: {error.message}</div>;
-
-    const titleStyle = {
-        marginTop: "30px",
-        textAlign: "center",
-        marginBottom: "30px"
-    };
-
-    const tableStyle = {
-        borderCollapse: 'collapse',
-        padding: "30px",
-        margin: "auto",
-        width: "40%"
-    };
-
-    const thTdStyle = {
-        border: '1px solid black',
-        width: '20%',
-        textAlign: 'center',
-        padding: "20px"
-    };
-
-    const thStyle = {
-        ...thTdStyle,
-        backgroundColor: '#f2f2f2'
-    };
-
-    const buttonstyle = {
-        backgroundColor: 'blue',
-        border: "2px solid white",
-        padding: "5px",
-        textDecoration: "none",
-        color: "white",
-        width: "150px",
-        float: "right",
-        marginRight: "200px",
-        marginTop: "30px",
-        alignSelf: "right"
-    };
 
     const formatDate = (timestamp) => {
         const date = new Date(timestamp);
@@ -73,37 +55,52 @@ const LeaderboardQuiz = () => {
     };
 
     return (
-        <div>
-            <div>
-                <h1 style={titleStyle}>Title: {quizInfo.quizTitle}</h1>
-                <h2 style={titleStyle}>Subject: {quizInfo.subject?.subjectName || 'N/A'}</h2>
-                <h4 style={titleStyle}>Description: {quizInfo.quizDescription}</h4>
-            </div>
-
-            <table style={tableStyle}>
-                <thead>
-                <tr>
-                    <th style={thStyle}>Username</th>
-                    <th style={thStyle}>Start Time</th>
-                    <th style={thStyle}>Finish Time</th>
-                    <th style={thStyle}>Final Result</th>
-                </tr>
-                </thead>
-                <tbody>
-                {leaderboardInfo.map((l, index) => (
-                    <tr key={index}>
-                        <td style={thTdStyle}>{l.user.username}</td>
-                        <td style={thTdStyle}>{formatDate(l.startTime)}</td>
-                        <td style={thTdStyle}>{formatDate(l.finishTime)}</td>
-                        <td style={thTdStyle}>{l.finalResult}</td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
-            <Link to={"/leaderboard"}>
-                <button style={buttonstyle}>Go back</button>
-            </Link>
-        </div>
+        <Container maxWidth="md">
+            <Box sx={{ textAlign: 'center', mb: 4 }}>
+                <Typography variant="h4" component="h1" gutterBottom>
+                    {quizInfo.quizTitle}
+                </Typography>
+                <Typography variant="h6" component="h2" gutterBottom>
+                    Subject: {quizInfo.subject?.subjectName || 'N/A'}
+                </Typography>
+                <Typography variant="body1" color="textSecondary">
+                    {quizInfo.quizDescription}
+                </Typography>
+            </Box>
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell align="center" sx={{ backgroundColor: '#3f51b5', color: 'white' }}>Username</TableCell>
+                            <TableCell align="center" sx={{ backgroundColor: '#3f51b5', color: 'white' }}>Start Time</TableCell>
+                            <TableCell align="center" sx={{ backgroundColor: '#3f51b5', color: 'white' }}>Finish Time</TableCell>
+                            <TableCell align="center" sx={{ backgroundColor: '#3f51b5', color: 'white' }}>Final Result</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {leaderboardInfo.map((l, index) => (
+                            <TableRow key={index} sx={{ backgroundColor: index % 2 === 0 ? '#f1f1f1' : 'white' }}>
+                                <TableCell align="center">{l.user.username}</TableCell>
+                                <TableCell align="center">{formatDate(l.startTime)}</TableCell>
+                                <TableCell align="center">{formatDate(l.finishTime)}</TableCell>
+                                <TableCell align="center">{l.finalResult}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+            <Box sx={{ textAlign: 'right', mt: 4 }}>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<ArrowBackIcon />}
+                    component={Link}
+                    to="/leaderboard"
+                >
+                    Go back
+                </Button>
+            </Box>
+        </Container>
     );
 };
 

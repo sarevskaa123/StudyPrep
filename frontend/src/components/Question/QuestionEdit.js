@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from "../../custom-axios/axios";
-import "./QuestionEdit.css";
+import { Container, TextField, Button, MenuItem, Select, InputLabel, FormControl, Typography, Paper, Box, FormControlLabel, Checkbox } from '@mui/material';
 
 const QuestionEdit = () => {
     const { questionId } = useParams();
@@ -14,6 +14,7 @@ const QuestionEdit = () => {
     const [isCorrect, setIsCorrect] = useState([false, false, false, false]);
     const [selectedFile, setSelectedFile] = useState(null);
     const [currentImage, setCurrentImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
 
     useEffect(() => {
         const fetchQuestionDetails = async () => {
@@ -57,6 +58,18 @@ const QuestionEdit = () => {
 
         fetchQuestionDetails();
     }, [questionId]);
+
+    useEffect(() => {
+        if (selectedFile) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(selectedFile);
+        } else {
+            setImagePreview(null);
+        }
+    }, [selectedFile]);
 
     const handleSave = async (e) => {
         e.preventDefault();
@@ -118,81 +131,98 @@ const QuestionEdit = () => {
     };
 
     return (
-        <div className="question-edit-container">
-            <h1>Edit Question</h1>
-            <form onSubmit={handleSave} className="question-form">
-                <div className="form-group">
-                    <label>Question Text</label>
-                    <input
-                        type="text"
+        <Container maxWidth="md" style={{ marginTop: '20px', padding: '20px' }}>
+            <Typography variant="h3" gutterBottom>Edit Question</Typography>
+            <Paper elevation={3} style={{ padding: '20px', marginBottom: '20px' }}>
+                <form onSubmit={handleSave} className="question-form">
+                    <TextField
+                        fullWidth
+                        margin="normal"
+                        label="Question Text"
                         value={questionText}
                         onChange={(e) => setQuestionText(e.target.value)}
                     />
-                </div>
-                <div className="form-group">
-                    <label>Attach Image</label>
-                    <input type="file" onChange={(e) => setSelectedFile(e.target.files[0])} />
-                    {currentImage && <img src={currentImage} alt="current question" style={{maxWidth: '100%', marginTop: '10px'}} />}
-                </div>
-                {(questionType === 'Single' || questionType === 'Multiple') && (
-                    <div className="form-group">
-                        {answerOptions.map((option, index) => (
-                            <div key={index}>
-                                <label>Option {index + 1}</label>
-                                <input
-                                    type="text"
-                                    value={option}
-                                    onChange={(e) => {
-                                        const newOptions = [...answerOptions];
-                                        newOptions[index] = e.target.value;
-                                        setAnswerOptions(newOptions);
-                                    }}
-                                />
-                            </div>
-                        ))}
-                        {questionType === 'Multiple' && (
-                            <div className="form-group">
-                                {isCorrect.map((correct, index) => (
-                                    <label key={index}>
-                                        <input
-                                            type="checkbox"
-                                            checked={correct}
-                                            onChange={(e) => {
-                                                const newIsCorrect = [...isCorrect];
-                                                newIsCorrect[index] = e.target.checked;
-                                                setIsCorrect(newIsCorrect);
-                                            }}
-                                        />
-                                        Correct
-                                    </label>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                )}
-                {(questionType === 'Single' || questionType === 'Text') && (
-                    <div className="form-group">
-                        <label>Correct Answer</label>
+                    <Box mb={2}>
+                        <Typography variant="body1" gutterBottom>Attach Image</Typography>
                         <input
-                            type="text"
+                            type="file"
+                            onChange={(e) => setSelectedFile(e.target.files[0])}
+                            style={{ display: 'block' }}
+                        />
+                        {imagePreview && (
+                            <Box mt={2}>
+                                <Typography variant="body2" gutterBottom>Image Preview:</Typography>
+                                <img src={imagePreview} alt="Preview" style={{ maxWidth: '100%', maxHeight: '300px' }} />
+                            </Box>
+                        )}
+                        {currentImage && !selectedFile && (
+                            <Box mt={2}>
+                                <Typography variant="body2" gutterBottom>Current Image:</Typography>
+                                <img src={currentImage} alt="Current question" style={{ maxWidth: '100%', maxHeight: '300px' }} />
+                            </Box>
+                        )}
+                    </Box>
+                    {(questionType === 'Single' || questionType === 'Multiple') && (
+                        <div>
+                            {answerOptions.map((option, index) => (
+                                <Box key={index} display="flex" alignItems="center" mb={2}>
+                                    <TextField
+                                        fullWidth
+                                        label={`Option ${index + 1}`}
+                                        value={option}
+                                        onChange={(e) => {
+                                            const newOptions = [...answerOptions];
+                                            newOptions[index] = e.target.value;
+                                            setAnswerOptions(newOptions);
+                                        }}
+                                    />
+                                    {questionType === 'Multiple' && (
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    checked={isCorrect[index]}
+                                                    onChange={(e) => {
+                                                        const newIsCorrect = [...isCorrect];
+                                                        newIsCorrect[index] = e.target.checked;
+                                                        setIsCorrect(newIsCorrect);
+                                                    }}
+                                                />
+                                            }
+                                            label="Correct"
+                                            style={{ marginLeft: '10px' }}
+                                        />
+                                    )}
+                                </Box>
+                            ))}
+                        </div>
+                    )}
+                    {(questionType === 'Single' || questionType === 'Text') && (
+                        <TextField
+                            fullWidth
+                            margin="normal"
+                            label="Correct Answer"
                             value={correctAnswer}
                             onChange={(e) => setCorrectAnswer(e.target.value)}
                         />
-                    </div>
-                )}
-                {questionType === 'Bool' && (
-                    <div className="form-group">
-                        <label>Correct Answer</label>
-                        <select value={correctAnswer} onChange={(e) => setCorrectAnswer(e.target.value)}>
-                            <option value="">Select correct answer</option>
-                            <option value="true">True</option>
-                            <option value="false">False</option>
-                        </select>
-                    </div>
-                )}
-                <button type="submit">Save</button>
-            </form>
-        </div>
+                    )}
+                    {questionType === 'Bool' && (
+                        <FormControl fullWidth margin="normal">
+                            <InputLabel id="correct-answer-label">Correct Answer</InputLabel>
+                            <Select
+                                labelId="correct-answer-label"
+                                value={correctAnswer}
+                                onChange={(e) => setCorrectAnswer(e.target.value)}
+                            >
+                                <MenuItem value=""><em>None</em></MenuItem>
+                                <MenuItem value="true">True</MenuItem>
+                                <MenuItem value="false">False</MenuItem>
+                            </Select>
+                        </FormControl>
+                    )}
+                    <Button variant="contained" color="primary" type="submit" fullWidth style={{ marginTop: '20px' }}>Save</Button>
+                </form>
+            </Paper>
+        </Container>
     );
 };
 

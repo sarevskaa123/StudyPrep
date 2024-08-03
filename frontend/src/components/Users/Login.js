@@ -1,69 +1,78 @@
 import React from 'react';
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import StudyPrepService from "../../repository/StudyPrepRepository";
+import { Container, Box, TextField, Button, Typography, Paper } from '@mui/material';
+import logo from './login.png'; // Ensure this path is correct
 
 const Login = (props) => {
-
     const history = useNavigate();
     const [formData, updateFormData] = React.useState({
         username: "",
         password: ""
-    })
+    });
 
     const handleChange = (e) => {
         updateFormData({
             ...formData,
             [e.target.name]: e.target.value.trim()
-        })
-    }
+        });
+    };
 
     const onFormSubmit = (e) => {
         e.preventDefault();
-        // const username = formData.username;
-        // const password = formData.password;
-        //
-        // props.onLogin()
-        // history("admin")
         StudyPrepService.login(formData.username, formData.password).then(resp => {
-            console.log(resp.data)
+            console.log(resp.data);
             localStorage.setItem("UserId", resp.data.userId);
             localStorage.setItem("Username", resp.data.username);
             localStorage.setItem("Email", resp.data.email);
             localStorage.setItem("Userrole", resp.data.userRole);
-            props.onLogin()
-            history("/");
-        })
-    }
+            props.onLogin();
+            history("/subjects");
+        });
+    };
 
     return (
-        <div className="row mt-5">
-            <div className="col-md-5">
+        <Container maxWidth="xs">
+            <Paper elevation={3} sx={{ p: 4, mt: 8 }}>
+                <Box sx={{ textAlign: 'center', mb: 4 }}>
+                    <img src={logo} alt="Logo" style={{ width: '100px', height: '100px' }} />
+                </Box>
+                <Typography variant="h5" component="h1" gutterBottom textAlign="center">
+                    Login
+                </Typography>
                 <form onSubmit={onFormSubmit}>
-                    <div className="form-group">
-                        <label htmlFor="name">Username</label>
-                        <input type="text"
-                               className="form-control"
-                               name="username"
-                               required
-                               placeholder="Enter username"
-                               onChange={handleChange}
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="price">Password</label>
-                        <input type="password"
-                               className="form-control"
-                               name="password"
-                               placeholder="Enter password"
-                               required
-                               onChange={handleChange}
-                        />
-                    </div>
-                    <button id="submit" type="submit" className="btn btn-primary">Submit</button>
+                    <TextField
+                        label="Username"
+                        name="username"
+                        variant="outlined"
+                        fullWidth
+                        margin="normal"
+                        required
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        label="Password"
+                        name="password"
+                        type="password"
+                        variant="outlined"
+                        fullWidth
+                        margin="normal"
+                        required
+                        onChange={handleChange}
+                    />
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        sx={{ mt: 2 }}
+                    >
+                        Submit
+                    </Button>
                 </form>
-            </div>
-        </div>
-    )
-}
+            </Paper>
+        </Container>
+    );
+};
 
 export default Login;

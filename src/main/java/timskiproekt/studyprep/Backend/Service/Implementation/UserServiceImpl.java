@@ -6,8 +6,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import timskiproekt.studyprep.Backend.Model.DTO.RegisterDTO;
 import timskiproekt.studyprep.Backend.Model.entities.User;
-import timskiproekt.studyprep.Backend.Model.exceptions.InvalidUsernameOrPasswordException;
 import timskiproekt.studyprep.Backend.Model.exceptions.PasswordsDoNotMatchException;
+import timskiproekt.studyprep.Backend.Model.exceptions.UserAlreadyRegisteredWithEmailException;
 import timskiproekt.studyprep.Backend.Model.exceptions.UsernameAlreadyExistsException;
 import timskiproekt.studyprep.Backend.Repository.UserRepository;
 import timskiproekt.studyprep.Backend.Service.UserService;
@@ -38,22 +38,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> register(RegisterDTO registerDTO) {
-        if (registerDTO.getUsername()==null || registerDTO.getUsername().isEmpty()
-                || registerDTO.getPassword()==null || registerDTO.getPassword().isEmpty())
-            throw new InvalidUsernameOrPasswordException();
+    public User register(RegisterDTO registerDTO) {
         if (!registerDTO.getPassword().equals(registerDTO.getRepeatPassword()))
             throw new PasswordsDoNotMatchException();
-        if(this.userRepository.findByUsername(registerDTO.getUsername()).isPresent())
-            throw new UsernameAlreadyExistsException(registerDTO.getUsername());
+        Optional<User> userOptional = userRepository.findByUsernameOrEmail(registerDTO.getUsername(), registerDTO.getEmail());
+        if (userOptional.isPresent()) {
+            User userExists = userOptional.get();
+            final String registerEmail = registerDTO.getEmail();
+            final String registerUsername = registerDTO.getUsername();
+            if (userExists.getEmail().equals(registerEmail)) {
+                throw new UserAlreadyRegisteredWithEmailException(registerEmail);
+            } else if (userExists.getUsername().equals(registerUsername)) {
+                throw new UsernameAlreadyExistsException(registerUsername);
+            }
+        }
         User user = new User(registerDTO.getUsername(),registerDTO.getEmail(),passwordEncoder.encode(registerDTO.getPassword()));
         userRepository.save(user);
-        return Optional.of(user);
-    }
-
-    @Override
-    public User findByUsername(String username) {
-        return userRepository.findByUsername(username).orElseThrow(()->new UsernameNotFoundException(username));
+        return user;
     }
 
 }

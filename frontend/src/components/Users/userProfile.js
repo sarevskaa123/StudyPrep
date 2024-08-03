@@ -1,6 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import {
+    Container,
+    Typography,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    Box,
+    Card,
+    CardContent,
+    Divider,
+    CircularProgress
+} from '@mui/material';
 
 const UserInfo = () => {
     const [userInfo, setUserInfo] = useState(null);
@@ -24,66 +40,83 @@ const UserInfo = () => {
         fetchUserInfo();
     }, []);
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) {
+        return (
+            <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" height="100vh">
+                <CircularProgress />
+                <Typography variant="h6" component="div" mt={2}>Loading...</Typography>
+            </Box>
+        );
+    }
     if (error) return <div>Error: {error.message}</div>;
 
-    const tableStyle = {
-        borderCollapse: 'collapse',
-        width: '100%',
-    };
-
-    const thTdStyle = {
-        border: '1px solid black',
-        textAlign: 'center',
-        padding: '8px',
-    };
-
-    const thStyle = {
-        ...thTdStyle,
-        backgroundColor: '#f2f2f2',
-    };
-
     return (
-        <div>
-            <h1>User Information</h1>
-            {userInfo && userInfo.user && (
-                <>
-                    <p>Email: {userInfo.user.email}</p>
-                    <p>Register Date: {new Date(userInfo.user.registerDate).toLocaleString()}</p>
-                    <p>Username: {userInfo.user.username}</p>
-
-                    <h2>All attempts for user {userInfo.user.username}</h2>
-                    <table style={tableStyle}>
-                        <thead>
-                        <tr>
-                            <th style={thStyle}>Quiz Title</th>
-                            <th style={thStyle}>Subject</th>
-                            <th style={thStyle}>Start Time</th>
-                            <th style={thStyle}>Finish Time</th>
-                            <th style={thStyle}>Total Points</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {userInfo.attempts && userInfo.attempts.length > 0 ? (
-                            userInfo.attempts.map(attempt => (
-                                <tr key={attempt.attemptId}>
-                                    <td style={thTdStyle}><Link to={`/attempt/${attempt.attemptId}`}>{attempt.quiz?.quizTitle || 'N/A'}</Link></td>
-                                    <td style={thTdStyle}>{attempt.quiz?.subject?.subjectName || 'N/A'}</td>
-                                    <td style={thTdStyle}>{attempt.startTime ? new Date(attempt.startTime).toLocaleString() : 'N/A'}</td>
-                                    <td style={thTdStyle}>{attempt.finishTime ? new Date(attempt.finishTime).toLocaleString() : 'N/A'}</td>
-                                    <td style={thTdStyle}>{attempt.finalResult}</td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="5" style={thTdStyle}>No attempts found</td>
-                            </tr>
-                        )}
-                        </tbody>
-                    </table>
-                </>
-            )}
-        </div>
+        <Container maxWidth="lg">
+            <Box sx={{ mb: 4 }}>
+                <Typography variant="h4" component="h1" gutterBottom>
+                    User Information
+                </Typography>
+                {userInfo && userInfo.user && (
+                    <Card variant="outlined" sx={{ mb: 4, backgroundColor: '#f9f9f9' }}>
+                        <CardContent>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                                    <Typography variant="h6">Email:</Typography>
+                                    <Typography variant="body1">{userInfo.user.email}</Typography>
+                                </Box>
+                                <Divider sx={{ my: 1, borderBottomWidth: 2, background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)' }} />
+                                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                                    <Typography variant="h6">Register Date:</Typography>
+                                    <Typography variant="body1">{new Date(userInfo.user.registerDate).toLocaleString()}</Typography>
+                                </Box>
+                                <Divider sx={{ my: 1, borderBottomWidth: 2, background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)' }} />
+                                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                                    <Typography variant="h6">Username:</Typography>
+                                    <Typography variant="body1">{userInfo.user.username}</Typography>
+                                </Box>
+                            </Box>
+                        </CardContent>
+                    </Card>
+                )}
+                <Typography variant="h5" component="h2" gutterBottom>
+                    All attempts for user {userInfo.user.username}
+                </Typography>
+                <TableContainer component={Paper}>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell align="center" sx={{ backgroundColor: '#3f51b5', color: 'white' }}>Quiz Title</TableCell>
+                                <TableCell align="center" sx={{ backgroundColor: '#3f51b5', color: 'white' }}>Subject</TableCell>
+                                <TableCell align="center" sx={{ backgroundColor: '#3f51b5', color: 'white' }}>Start Time</TableCell>
+                                <TableCell align="center" sx={{ backgroundColor: '#3f51b5', color: 'white' }}>Finish Time</TableCell>
+                                <TableCell align="center" sx={{ backgroundColor: '#3f51b5', color: 'white' }}>Total Points</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {userInfo.attempts && userInfo.attempts.length > 0 ? (
+                                userInfo.attempts.map(attempt => (
+                                    <TableRow key={attempt.attemptId} sx={{ backgroundColor: '#f1f1f1' }}>
+                                        <TableCell align="center">
+                                            <Link to={`/attempt/${attempt.attemptId}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                                {attempt.quiz?.quizTitle || 'N/A'}
+                                            </Link>
+                                        </TableCell>
+                                        <TableCell align="center">{attempt.quiz?.subject?.subjectName || 'N/A'}</TableCell>
+                                        <TableCell align="center">{attempt.startTime ? new Date(attempt.startTime).toLocaleString() : 'N/A'}</TableCell>
+                                        <TableCell align="center">{attempt.finishTime ? new Date(attempt.finishTime).toLocaleString() : 'N/A'}</TableCell>
+                                        <TableCell align="center">{attempt.finalResult}</TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan="5" align="center">No attempts found</TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Box>
+        </Container>
     );
 }
 

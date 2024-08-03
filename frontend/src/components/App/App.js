@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 import Header from "../Header/header";
-import QuizAdd from "../Quiz/QuizAdd";
 import LeaderboardQuiz from "../Quiz/LeaderboardQuiz";
 import QuizEdit from '../Quiz/QuizEdit';
 import QuestionEdit from '../Question/QuestionEdit';
-import Quizzes from "../Quiz/quizzes";
 import Subject from '../Subject/Subject';
 import SubjectDetail from '../Subject/SubjectDetail';
 import Register from "../Users/Register";
@@ -17,6 +17,7 @@ import AttemptDetails from "../Users/AttemptDetails";
 import Leaderboard from "../Users/Leaderboard";
 import QuizStart from '../Quiz/QuizStart';
 import axios from 'axios'; // Add this import statement
+import theme from '../../theme/theme'; // Import the theme
 
 class App extends Component {
     constructor(props) {
@@ -28,7 +29,7 @@ class App extends Component {
             user: {},
             userInfo: [],
             quizQuestions: []
-        }
+        };
     }
 
     fetchSubjectDetails = async (subjectId) => {
@@ -62,36 +63,34 @@ class App extends Component {
 
     render() {
         return (
-            <Router>
-                <Header user={this.state.user} />
-                <main>
-                    <div className={"container"}>
-                        <Routes>
-                            <Route path={"/addQuiz"} element={
-                                <QuizAdd subject={this.state.subjects} user={this.state.user} onAddQuiz={this.addQuiz} />} />
-                            <Route path={"/editQuiz/:id"} element={
-                                <QuizEdit subject={this.state.subjects} onEditQuiz={this.editQuiz}
-                                          quiz={this.state.selectedQuiz} user={this.state.user} />} />
-                            <Route path={"/quizzes/edit/:quizId"} element={<QuizEdit onEditQuiz={this.editQuiz} />} />
-                            <Route path={"/admin"} element={<Quizzes quizzes={this.state.quizzes} user={this.state.user}
-                                                                     onDelete={this.deleteQuiz} onEdit={this.getQuiz} onView={this.loadQuestionsForQuiz} />} />
-                            <Route path={"/profile"} element={<UserInfo quizzes={this.state.quizzes} />} />
-                            <Route path="/subjects" element={<Subject />} />
-                            <Route path="/subjects/:subjectId" element={
-                                <SubjectDetail fetchSubjectDetails={this.fetchSubjectDetails} addQuizToSubject={this.addQuizToSubject} />} />
-                            <Route path="/quizzes" element={<Quizzes />} />
-                            <Route path="/leaderboard" element={<Leaderboard quizzes={this.state.quizzes} />} />
-                            <Route path={"/login"} element={<Login onLogin={this.fetchData} />} />
-                            <Route path={"/register"} element={<Register onRegister={this.fetchData} />} />
-                            <Route path={"/"} element={<Home user={this.state.user} />} />
-                            <Route path="/questions/edit/:questionId" element={<QuestionEdit />} />
-                            <Route path="/attempt/:attemptId" element={<AttemptDetails />} />
-                            <Route path="/leaderboardQuiz/:quizId" element={<LeaderboardQuiz />} />
-                            <Route path="/quizzes/start/:quizId" element={<QuizStart />} />
-                        </Routes>
-                    </div>
-                </main>
-            </Router>
+            <ThemeProvider theme={theme}>
+                <CssBaseline />
+                <Router>
+                    <Header user={this.state.user} />
+                    <main>
+                        <div className={"container"}>
+                            <Routes>
+                                <Route path={"/editQuiz/:id"} element={
+                                    <QuizEdit subject={this.state.subjects} onEditQuiz={this.editQuiz}
+                                              quiz={this.state.selectedQuiz} user={this.state.user} />} />
+                                <Route path={"/quizzes/edit/:quizId"} element={<QuizEdit onEditQuiz={this.editQuiz} />} />
+                                <Route path={"/profile"} element={<UserInfo quizzes={this.state.quizzes} />} />
+                                <Route path="/subjects" element={<Subject />} />
+                                <Route path="/subjects/:subjectId" element={
+                                    <SubjectDetail fetchSubjectDetails={this.fetchSubjectDetails} addQuizToSubject={this.addQuizToSubject} />} />
+                                <Route path="/leaderboard" element={<Leaderboard quizzes={this.state.quizzes} />} />
+                                <Route path={"/login"} element={<Login onLogin={this.fetchData} />} />
+                                <Route path={"/register"} element={<Register onRegister={this.fetchData} />} />
+                                <Route path={"/"} element={<Home user={this.state.user} />} />
+                                <Route path="/questions/edit/:questionId" element={<QuestionEdit />} />
+                                <Route path="/attempt/:attemptId" element={<AttemptDetails />} />
+                                <Route path="/leaderboardQuiz/:quizId" element={<LeaderboardQuiz />} />
+                                <Route path="/quizzes/start/:quizId" element={<QuizStart />} />
+                            </Routes>
+                        </div>
+                    </main>
+                </Router>
+            </ThemeProvider>
         );
     }
 
@@ -99,7 +98,7 @@ class App extends Component {
         StudyPrepService.fetchQuiz().then((data) => {
             this.setState({
                 quizzes: data.data
-            })
+            });
         });
     }
 
@@ -107,7 +106,7 @@ class App extends Component {
         StudyPrepService.fetchSubject().then((data) => {
             this.setState({
                 subjects: data.data
-            })
+            });
         });
     }
 
@@ -115,79 +114,80 @@ class App extends Component {
         StudyPrepService.fetchQuestions().then((data) => {
             this.setState({
                 quizQuestions: data.data
-            })
-        })
+            });
+        });
     }
 
     getUserInfo = (id) => {
         StudyPrepService.getUserInfo(id).then((data) => {
             this.setState({
                 userInfo: data.data
-            })
-        })
+            });
+        });
     }
 
     loadQuestionsForQuiz = (id) => {
         StudyPrepService.fetchQuestionsForQuiz(id).then((data) => {
             this.setState({
                 quizQuestions: data.data
-            })
-        })
+            });
+        });
     }
+
     deleteQuiz = (id) => {
         StudyPrepService.deleteQuiz(id).then(() => {
             this.loadQuizzes();
-        })
+        });
     }
 
     deleteQuestion = (questionText) => {
         StudyPrepService.deleteQuestionAll(questionText).then(() => {
             this.loadQuizzes();
-        })
+        });
     }
 
     addQuiz = (userId, quizTitle, quizDescription, subject) => {
         StudyPrepService.addQuiz(userId, quizTitle, quizDescription, subject).then(() => {
             this.loadQuizzes();
-        })
+        });
     }
 
     getQuiz = (id) => {
         StudyPrepService.getQuiz(id).then((data) => {
             this.setState({
                 selectedQuiz: data.data
-            })
-        })
+            });
+        });
     }
 
     editQuiz = (id, quizTitle, quizDescription, subject) => {
         StudyPrepService.editQuiz(id, quizTitle, quizDescription, subject).then(() => {
             this.loadQuizzes();
-        })
+        });
     }
 
     questionSingleCreate = (questionText, quizId, answer1, answer2, answer3, answer4, answerCorrect) => {
         StudyPrepService.createSingleQuestion(questionText, quizId, answer1, answer2, answer3, answer4, answerCorrect).then(() => {
             this.loadQuizzes();
-        })
+        });
     }
 
     questionMultipleCreate = (questionText, quizId, answer1, answer2, answer3, answer4, checked1, checked2, checked3, checked4) => {
         StudyPrepService.createMultipleQuestion(questionText, quizId, answer1, answer2, answer3, answer4, checked1, checked2, checked3, checked4).then(() => {
             this.loadQuizzes();
-        })
+        });
     }
 
     questionBoolCreate = (questionText, quizId, isCorrect) => {
         StudyPrepService.createBoolQuestion(questionText, quizId, isCorrect).then(() => {
             this.loadQuizzes();
-        })
+        });
     }
 
     questionTextCreate = (questionText, answerText, quizId) => {
         StudyPrepService.createTextQuestion(questionText, answerText, quizId).then(() => {
             this.loadQuizzes();
-        })
+        });
     }
 
     fetchData = () => {

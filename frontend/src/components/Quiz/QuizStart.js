@@ -1,6 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from "../../custom-axios/axios";
+import {
+    Button,
+    Checkbox,
+    FormControlLabel,
+    Radio,
+    RadioGroup,
+    TextField,
+    Typography,
+    Container,
+    Box,
+    CircularProgress,
+    Paper,
+    Grid
+} from '@mui/material';
 
 const QuizStart = () => {
     const { quizId } = useParams();
@@ -116,7 +130,6 @@ const QuizStart = () => {
     const saveAttempt = async () => {
         const userId = localStorage.getItem('UserId'); // Get the user ID from local storage
         const questionAttempts = userAnswers.map((answer) => {
-            console.log('Answer:', answer); // Debugging log
             return {
                 questionId: answer.question.questionId,
                 userAnswers: answer.userAnswer ? answer.userAnswer.split(',').map(part => part.trim()) : [],
@@ -153,31 +166,39 @@ const QuizStart = () => {
         const incorrectAnswers = userAnswers.filter(answer => !answer.isCorrect);
 
         return (
-            <div>
-                <h1>Quiz Results</h1>
-                <p>Score: {score} / {questions.length}</p>
-                <p>Time Taken: {timeTaken.toFixed(2)} seconds</p>
-                <h2>Incorrect Answers</h2>
+            <Container>
+                <Typography variant="h3" gutterBottom style={{ fontWeight: 'bold', color: '#3f51b5' }}>Quiz Results</Typography>
+                <Typography variant="h5" gutterBottom style={{ color: '#4caf50' }}>Score: {score} / {questions.length}</Typography>
+                <Typography variant="h5" gutterBottom style={{ color: '#ff9800' }}>Time Taken: {timeTaken.toFixed(2)} seconds</Typography>
+                <Typography variant="h4" gutterBottom style={{ color: '#f44336' }}>Incorrect Answers</Typography>
                 {incorrectAnswers.length === 0 ? (
-                    <p>There are no incorrect answers. Great job!</p>
+                    <Typography variant="body1">There are no incorrect answers. Great job!</Typography>
                 ) : (
-                    <ul>
+                    <Grid container spacing={2}>
                         {incorrectAnswers.map((answer, index) => (
-                            <li key={index}>
-                                <p><strong>Question:</strong> {answer.question.questionText}</p>
-                                <p><strong>Your Answer:</strong> {answer.userAnswer}</p>
-                                <p><strong>Correct Answer:</strong> {answer.correctAnswer}</p>
-                            </li>
+                            <Grid item xs={12} key={index}>
+                                <Paper elevation={3} style={{ padding: '10px', backgroundColor: '#f8f9fa' }}>
+                                    <Typography variant="body1"><strong>Question:</strong> {answer.question.questionText}</Typography>
+                                    <Box mt={2}>
+                                        <Typography variant="body2" style={{ color: 'red' }}><strong>Your Answer:</strong> {answer.userAnswer}</Typography>
+                                        <Typography variant="body2" style={{ color: 'green' }}><strong>Correct Answer:</strong> {answer.correctAnswer}</Typography>
+                                    </Box>
+                                </Paper>
+                            </Grid>
                         ))}
-                    </ul>
+                    </Grid>
                 )}
-                <button onClick={() => navigate('/')}>Back to Home</button>
-            </div>
+                <Button variant="contained" color="primary" onClick={() => navigate('/')}>Back to Home</Button>
+            </Container>
         );
     }
 
     if (questions.length === 0) {
-        return <div>Loading...</div>;
+        return (
+            <Container>
+                <CircularProgress />
+            </Container>
+        );
     }
 
     const currentQuestion = questions[currentQuestionIndex];
@@ -190,98 +211,82 @@ const QuizStart = () => {
         switch (questionType) {
             case 'Multiple':
                 return (
-                    <div>
-                        <p>{questionText}</p>
-                        {imageSrc && <img src={imageSrc} alt="question" style={{ maxWidth: '100%', marginBottom: '10px' }} />}
+                    <Box>
+                        <Typography variant="h6">{questionText}</Typography>
+                        {imageSrc && <img src={imageSrc} alt="question" style={{ maxWidth: '100%', maxHeight: '300px', width: 'auto', height: 'auto', marginBottom: '10px' }} />}
                         {answerOptions.map((option, index) => (
-                            <div key={index}>
-                                <input
-                                    type="checkbox"
-                                    checked={!!selectedAnswer[index]}
-                                    onChange={(e) => handleAnswerSelect(index, e.target.checked)}
-                                />
-                                <label>{option}</label>
-                            </div>
+                            <FormControlLabel
+                                key={index}
+                                control={<Checkbox checked={!!selectedAnswer[index]} onChange={(e) => handleAnswerSelect(index, e.target.checked)} />}
+                                label={option}
+                            />
                         ))}
-                        {currentQuestionIndex > 0 && <button onClick={() => handleAnswerSubmit(false)}>Previous</button>}
-                        <button onClick={() => handleAnswerSubmit(true)}>Next</button>
-                    </div>
+                        <Box mt={2}>
+                            {currentQuestionIndex > 0 && <Button variant="contained" color="secondary" onClick={() => handleAnswerSubmit(false)}>Previous</Button>}
+                            <Button variant="contained" color="primary" onClick={() => handleAnswerSubmit(true)}>Next</Button>
+                        </Box>
+                    </Box>
                 );
             case 'Single':
                 return (
-                    <div>
-                        <p>{questionText}</p>
-                        {imageSrc && <img src={imageSrc} alt="question" style={{ maxWidth: '100%', marginBottom: '10px' }} />}
-                        {answerOptions.map((option, index) => (
-                            <div key={index}>
-                                <input
-                                    type="radio"
-                                    name="singleChoice"
-                                    value={option}
-                                    onChange={() => setSelectedAnswer([option])}
-                                    checked={selectedAnswer.includes(option)}
-                                />
-                                <label>{option}</label>
-                            </div>
-                        ))}
-                        {currentQuestionIndex > 0 && <button onClick={() => handleAnswerSubmit(false)}>Previous</button>}
-                        <button onClick={() => handleAnswerSubmit(true)}>Next</button>
-                    </div>
+                    <Box>
+                        <Typography variant="h6">{questionText}</Typography>
+                        {imageSrc && <img src={imageSrc} alt="question" style={{ maxWidth: '100%', maxHeight: '300px', width: 'auto', height: 'auto', marginBottom: '10px' }} />}
+                        <RadioGroup value={selectedAnswer[0]} onChange={(e) => setSelectedAnswer([e.target.value])}>
+                            {answerOptions.map((option, index) => (
+                                <FormControlLabel key={index} value={option} control={<Radio />} label={option} />
+                            ))}
+                        </RadioGroup>
+                        <Box mt={2}>
+                            {currentQuestionIndex > 0 && <Button variant="contained" color="secondary" onClick={() => handleAnswerSubmit(false)}>Previous</Button>}
+                            <Button variant="contained" color="primary" onClick={() => handleAnswerSubmit(true)}>Next</Button>
+                        </Box>
+                    </Box>
                 );
             case 'Bool':
                 return (
-                    <div>
-                        <p>{questionText}</p>
-                        {imageSrc && <img src={imageSrc} alt="question" style={{ maxWidth: '100%', marginBottom: '10px' }} />}
-                        <div>
-                            <input
-                                type="radio"
-                                name="boolChoice"
-                                value="true"
-                                onChange={() => setSelectedAnswer(['true'])}
-                                checked={selectedAnswer.includes('true')}
-                            />
-                            <label>True</label>
-                        </div>
-                        <div>
-                            <input
-                                type="radio"
-                                name="boolChoice"
-                                value="false"
-                                onChange={() => setSelectedAnswer(['false'])}
-                                checked={selectedAnswer.includes('false')}
-                            />
-                            <label>False</label>
-                        </div>
-                        {currentQuestionIndex > 0 && <button onClick={() => handleAnswerSubmit(false)}>Previous</button>}
-                        <button onClick={() => handleAnswerSubmit(true)}>Next</button>
-                    </div>
+                    <Box>
+                        <Typography variant="h6">{questionText}</Typography>
+                        {imageSrc && <img src={imageSrc} alt="question" style={{ maxWidth: '100%', maxHeight: '300px', width: 'auto', height: 'auto', marginBottom: '10px' }} />}
+                        <RadioGroup value={selectedAnswer[0]} onChange={(e) => setSelectedAnswer([e.target.value])}>
+                            <FormControlLabel value="true" control={<Radio />} label="True" />
+                            <FormControlLabel value="false" control={<Radio />} label="False" />
+                        </RadioGroup>
+                        <Box mt={2}>
+                            {currentQuestionIndex > 0 && <Button variant="contained" color="secondary" onClick={() => handleAnswerSubmit(false)}>Previous</Button>}
+                            <Button variant="contained" color="primary" onClick={() => handleAnswerSubmit(true)}>Next</Button>
+                        </Box>
+                    </Box>
                 );
             case 'Text':
                 return (
-                    <div>
-                        <p>{questionText}</p>
-                        {imageSrc && <img src={imageSrc} alt="question" style={{ maxWidth: '100%', marginBottom: '10px' }} />}
-                        <input
-                            type="text"
+                    <Box>
+                        <Typography variant="h6">{questionText}</Typography>
+                        {imageSrc && <img src={imageSrc} alt="question" style={{ maxWidth: '100%', maxHeight: '300px', width: 'auto', height: 'auto', marginBottom: '10px' }} />}
+                        <TextField
+                            label="Your Answer"
+                            variant="outlined"
+                            fullWidth
                             value={selectedAnswer[0] || ''}
                             onChange={(e) => setSelectedAnswer([e.target.value])}
                         />
-                        {currentQuestionIndex > 0 && <button onClick={() => handleAnswerSubmit(false)}>Previous</button>}
-                        <button onClick={() => handleAnswerSubmit(true)}>Next</button>
-                    </div>
+                        <Box mt={2}>
+                            {currentQuestionIndex > 0 && <Button variant="contained" color="secondary" onClick={() => handleAnswerSubmit(false)}>Previous</Button>}
+                            <Button variant="contained" color="primary" onClick={() => handleAnswerSubmit(true)}>Next</Button>
+                        </Box>
+                    </Box>
                 );
             default:
-                return <p>Unknown question type</p>;
+                return <Typography variant="body1">Unknown question type</Typography>;
         }
     };
 
     return (
-        <div>
-            <h1>Question {currentQuestionIndex + 1}</h1>
+        <Container component={Paper} style={{ padding: '20px', marginTop: '20px' }}>
+            <Typography variant="h4" gutterBottom>Question {currentQuestionIndex + 1}</Typography>
             {renderQuestion()}
-            <button onClick={handleQuitQuiz} style={{ color: 'white', backgroundColor: 'red', marginTop: '10px' }}>Quit Quiz</button>
-        </div>
+            <Button variant="contained" color="error" onClick={handleQuitQuiz} style={{ marginTop: '20px' }}>Quit Quiz</Button>
+        </Container>
     );
 };
 

@@ -20,12 +20,10 @@ public class RegisterController {
 
 
     @PostMapping("/user")
-    public ResponseEntity<User> register(@RequestBody RegisterDTO registerDTO){
-        return this.userService.register(registerDTO)
-                .map(user -> ResponseEntity.ok().body(user))
-                .orElseGet(() -> ResponseEntity.badRequest().build());
+    public ResponseEntity<User> register(@RequestBody RegisterDTO registerDTO) {
+        User user = userService.register(registerDTO);
+        return ResponseEntity.ok().body(user);
     }
-
 
 
 }

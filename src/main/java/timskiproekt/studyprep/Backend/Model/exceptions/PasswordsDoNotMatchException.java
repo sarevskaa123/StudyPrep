@@ -1,8 +1,8 @@
 package timskiproekt.studyprep.Backend.Model.exceptions;
 
-public class PasswordsDoNotMatchException extends RuntimeException{
+public class PasswordsDoNotMatchException extends UserException{
 
     public PasswordsDoNotMatchException() {
-        super("Passwords do not match exception.");
+        super("Passwords do not match");
     }
 }

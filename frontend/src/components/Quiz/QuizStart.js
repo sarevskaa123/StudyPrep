@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, {useEffect, useState} from 'react';
+import {useParams, useNavigate, Form} from 'react-router-dom';
 import axios from "../../custom-axios/axios";
 import {
     Button,
@@ -13,11 +13,13 @@ import {
     Box,
     CircularProgress,
     Paper,
-    Grid
+    Grid,
+    Alert,
+    MenuItem
 } from '@mui/material';
 
 const QuizStart = () => {
-    const { quizId } = useParams();
+    const {quizId} = useParams();
     const [questions, setQuestions] = useState([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [score, setScore] = useState(0);
@@ -29,6 +31,10 @@ const QuizStart = () => {
     const [subjectId, setSubjectId] = useState(null);
     const [quizFinished, setQuizFinished] = useState(false);
     const navigate = useNavigate();
+    const [rating, setRating] = useState(false);
+    const [ratingScore, setRatingScore] = useState('');
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
 
     useEffect(() => {
         const fetchQuestions = async () => {
@@ -36,6 +42,10 @@ const QuizStart = () => {
                 const response = await axios.get(`/questions/quiz/random/${quizId}?count=10`);
                 setQuestions(response.data);
                 setStartTime(new Date());
+
+                const ratingResponse = await axios.get(`/rating/${quizId}/${localStorage.getItem("UserId")}`);
+                setRating(ratingResponse.data)
+                console.log(ratingResponse.data)
 
                 const quizResponse = await axios.get(`/api/quizzes/${quizId}`);
                 setSubjectId(quizResponse.data.subjectId.subjectId);
@@ -85,7 +95,13 @@ const QuizStart = () => {
             : selectedAnswer[0];
 
         const updatedUserAnswers = [...userAnswers];
-        updatedUserAnswers[currentQuestionIndex] = { question: currentQuestion, isCorrect, userAnswer: userAnswerText, correctAnswer, selectedAnswer };
+        updatedUserAnswers[currentQuestionIndex] = {
+            question: currentQuestion,
+            isCorrect,
+            userAnswer: userAnswerText,
+            correctAnswer,
+            selectedAnswer
+        };
         setUserAnswers(updatedUserAnswers);
 
         if (!userAnswers[currentQuestionIndex]) {
@@ -141,8 +157,8 @@ const QuizStart = () => {
             startTime,
             finishTime: new Date(),
             finalResult: score,
-            user: { userId: userId }, // Use the stored user ID
-            quiz: { quizId: quizId },
+            user: {userId: userId}, // Use the stored user ID
+            quiz: {quizId: quizId},
             historyQuiz: questionAttempts
         };
 
@@ -161,33 +177,97 @@ const QuizStart = () => {
         }
     };
 
+    const handleSubmitRating = async (e) => {
+        e.preventDefault();
+        if (ratingScore < 1 || ratingScore > 5) {
+            setError('Rating must be between 1 and 5.');
+            return;
+        }
+
+        const rating = {
+            ratingScore,
+            userId: localStorage.getItem("UserId") ,
+            quizId: quizId
+        };
+
+        try {
+            await axios.post('/rating', rating);
+            setSuccess('Rating submitted successfully');
+            setError('');
+            navigate('/')
+        } catch (error) {
+            setError('Error submitting rating. Please try again.');
+            setSuccess('');
+        }
+    };
+
+
     if (showResults) {
         const timeTaken = (endTime - startTime) / 1000;
         const incorrectAnswers = userAnswers.filter(answer => !answer.isCorrect);
 
         return (
             <Container>
-                <Typography variant="h3" gutterBottom style={{ fontWeight: 'bold', color: '#3f51b5' }}>Quiz Results</Typography>
-                <Typography variant="h5" gutterBottom style={{ color: '#4caf50' }}>Score: {score} / {questions.length}</Typography>
-                <Typography variant="h5" gutterBottom style={{ color: '#ff9800' }}>Time Taken: {timeTaken.toFixed(2)} seconds</Typography>
-                <Typography variant="h4" gutterBottom style={{ color: '#f44336' }}>Incorrect Answers</Typography>
+                <Typography variant="h3" gutterBottom style={{fontWeight: 'bold', color: '#3f51b5'}}>Quiz
+                    Results</Typography>
+                <Typography variant="h5" gutterBottom
+                            style={{color: '#4caf50'}}>Score: {score} / {questions.length}</Typography>
+                <Typography variant="h5" gutterBottom style={{color: '#ff9800'}}>Time
+                    Taken: {timeTaken.toFixed(2)} seconds</Typography>
+                <Typography variant="h4" gutterBottom style={{color: '#f44336'}}>Incorrect Answers</Typography>
                 {incorrectAnswers.length === 0 ? (
                     <Typography variant="body1">There are no incorrect answers. Great job!</Typography>
                 ) : (
                     <Grid container spacing={2}>
                         {incorrectAnswers.map((answer, index) => (
                             <Grid item xs={12} key={index}>
-                                <Paper elevation={3} style={{ padding: '10px', backgroundColor: '#f8f9fa' }}>
-                                    <Typography variant="body1"><strong>Question:</strong> {answer.question.questionText}</Typography>
+                                <Paper elevation={3} style={{padding: '10px', backgroundColor: '#f8f9fa'}}>
+                                    <Typography
+                                        variant="body1"><strong>Question:</strong> {answer.question.questionText}
+                                    </Typography>
                                     <Box mt={2}>
-                                        <Typography variant="body2" style={{ color: 'red' }}><strong>Your Answer:</strong> {answer.userAnswer}</Typography>
-                                        <Typography variant="body2" style={{ color: 'green' }}><strong>Correct Answer:</strong> {answer.correctAnswer}</Typography>
+                                        <Typography variant="body2" style={{color: 'red'}}><strong>Your
+                                            Answer:</strong> {answer.userAnswer}</Typography>
+                                        <Typography variant="body2" style={{color: 'green'}}><strong>Correct
+                                            Answer:</strong> {answer.correctAnswer}</Typography>
                                     </Box>
                                 </Paper>
                             </Grid>
                         ))}
                     </Grid>
                 )}
+                {rating === true ? (
+                        <Container maxWidth="sm">
+                            <Typography variant="h5" gutterBottom>
+                                Rate this Quiz
+                            </Typography>
+                            {error && <Alert severity="error">{error}</Alert>}
+                            {success && <Alert severity="success">{success}</Alert>}
+                            <Box component="form" onSubmit={handleSubmitRating} sx={{ mt: 2 }}>
+                                <TextField
+                                    select
+                                    label="Rating"
+                                    value={ratingScore}
+                                    onChange={(e) => setRatingScore(e.target.value)}
+                                    fullWidth
+                                    variant="outlined"
+                                    margin="normal"
+                                >
+                                    {[1, 2, 3, 4, 5].map((value) => (
+                                        <MenuItem key={value} value={value}>
+                                            {value}
+                                        </MenuItem>
+                                    ))}
+                                </TextField>
+                                <Button type="submit" variant="contained" color="primary" fullWidth>
+                                    Submit Rating
+                                </Button>
+                            </Box>
+                        </Container>
+                        )
+                    : (
+                        <Typography variant="body1">You have already left a rating.</Typography>
+                    )}
                 <Button variant="contained" color="primary" onClick={() => navigate('/')}>Back to Home</Button>
             </Container>
         );
@@ -196,13 +276,21 @@ const QuizStart = () => {
     if (questions.length === 0) {
         return (
             <Container>
-                <CircularProgress />
+                <CircularProgress/>
             </Container>
         );
     }
 
     const currentQuestion = questions[currentQuestionIndex];
-    const { questionText, questionType, answerOption1, answerOption2, answerOption3, answerOption4, image } = currentQuestion;
+    const {
+        questionText,
+        questionType,
+        answerOption1,
+        answerOption2,
+        answerOption3,
+        answerOption4,
+        image
+    } = currentQuestion;
     const answerOptions = [answerOption1, answerOption2, answerOption3, answerOption4].filter(option => option !== undefined && option !== null && option !== '');
 
     const renderQuestion = () => {
@@ -213,17 +301,26 @@ const QuizStart = () => {
                 return (
                     <Box>
                         <Typography variant="h6">{questionText}</Typography>
-                        {imageSrc && <img src={imageSrc} alt="question" style={{ maxWidth: '100%', maxHeight: '300px', width: 'auto', height: 'auto', marginBottom: '10px' }} />}
+                        {imageSrc && <img src={imageSrc} alt="question" style={{
+                            maxWidth: '100%',
+                            maxHeight: '300px',
+                            width: 'auto',
+                            height: 'auto',
+                            marginBottom: '10px'
+                        }}/>}
                         {answerOptions.map((option, index) => (
                             <FormControlLabel
                                 key={index}
-                                control={<Checkbox checked={!!selectedAnswer[index]} onChange={(e) => handleAnswerSelect(index, e.target.checked)} />}
+                                control={<Checkbox checked={!!selectedAnswer[index]}
+                                                   onChange={(e) => handleAnswerSelect(index, e.target.checked)}/>}
                                 label={option}
                             />
                         ))}
                         <Box mt={2}>
-                            {currentQuestionIndex > 0 && <Button variant="contained" color="secondary" onClick={() => handleAnswerSubmit(false)}>Previous</Button>}
-                            <Button variant="contained" color="primary" onClick={() => handleAnswerSubmit(true)}>Next</Button>
+                            {currentQuestionIndex > 0 && <Button variant="contained" color="secondary"
+                                                                 onClick={() => handleAnswerSubmit(false)}>Previous</Button>}
+                            <Button variant="contained" color="primary"
+                                    onClick={() => handleAnswerSubmit(true)}>Next</Button>
                         </Box>
                     </Box>
                 );
@@ -231,15 +328,23 @@ const QuizStart = () => {
                 return (
                     <Box>
                         <Typography variant="h6">{questionText}</Typography>
-                        {imageSrc && <img src={imageSrc} alt="question" style={{ maxWidth: '100%', maxHeight: '300px', width: 'auto', height: 'auto', marginBottom: '10px' }} />}
+                        {imageSrc && <img src={imageSrc} alt="question" style={{
+                            maxWidth: '100%',
+                            maxHeight: '300px',
+                            width: 'auto',
+                            height: 'auto',
+                            marginBottom: '10px'
+                        }}/>}
                         <RadioGroup value={selectedAnswer[0]} onChange={(e) => setSelectedAnswer([e.target.value])}>
                             {answerOptions.map((option, index) => (
-                                <FormControlLabel key={index} value={option} control={<Radio />} label={option} />
+                                <FormControlLabel key={index} value={option} control={<Radio/>} label={option}/>
                             ))}
                         </RadioGroup>
                         <Box mt={2}>
-                            {currentQuestionIndex > 0 && <Button variant="contained" color="secondary" onClick={() => handleAnswerSubmit(false)}>Previous</Button>}
-                            <Button variant="contained" color="primary" onClick={() => handleAnswerSubmit(true)}>Next</Button>
+                            {currentQuestionIndex > 0 && <Button variant="contained" color="secondary"
+                                                                 onClick={() => handleAnswerSubmit(false)}>Previous</Button>}
+                            <Button variant="contained" color="primary"
+                                    onClick={() => handleAnswerSubmit(true)}>Next</Button>
                         </Box>
                     </Box>
                 );
@@ -247,14 +352,22 @@ const QuizStart = () => {
                 return (
                     <Box>
                         <Typography variant="h6">{questionText}</Typography>
-                        {imageSrc && <img src={imageSrc} alt="question" style={{ maxWidth: '100%', maxHeight: '300px', width: 'auto', height: 'auto', marginBottom: '10px' }} />}
+                        {imageSrc && <img src={imageSrc} alt="question" style={{
+                            maxWidth: '100%',
+                            maxHeight: '300px',
+                            width: 'auto',
+                            height: 'auto',
+                            marginBottom: '10px'
+                        }}/>}
                         <RadioGroup value={selectedAnswer[0]} onChange={(e) => setSelectedAnswer([e.target.value])}>
-                            <FormControlLabel value="true" control={<Radio />} label="True" />
-                            <FormControlLabel value="false" control={<Radio />} label="False" />
+                            <FormControlLabel value="true" control={<Radio/>} label="True"/>
+                            <FormControlLabel value="false" control={<Radio/>} label="False"/>
                         </RadioGroup>
                         <Box mt={2}>
-                            {currentQuestionIndex > 0 && <Button variant="contained" color="secondary" onClick={() => handleAnswerSubmit(false)}>Previous</Button>}
-                            <Button variant="contained" color="primary" onClick={() => handleAnswerSubmit(true)}>Next</Button>
+                            {currentQuestionIndex > 0 && <Button variant="contained" color="secondary"
+                                                                 onClick={() => handleAnswerSubmit(false)}>Previous</Button>}
+                            <Button variant="contained" color="primary"
+                                    onClick={() => handleAnswerSubmit(true)}>Next</Button>
                         </Box>
                     </Box>
                 );
@@ -262,7 +375,13 @@ const QuizStart = () => {
                 return (
                     <Box>
                         <Typography variant="h6">{questionText}</Typography>
-                        {imageSrc && <img src={imageSrc} alt="question" style={{ maxWidth: '100%', maxHeight: '300px', width: 'auto', height: 'auto', marginBottom: '10px' }} />}
+                        {imageSrc && <img src={imageSrc} alt="question" style={{
+                            maxWidth: '100%',
+                            maxHeight: '300px',
+                            width: 'auto',
+                            height: 'auto',
+                            marginBottom: '10px'
+                        }}/>}
                         <TextField
                             label="Your Answer"
                             variant="outlined"
@@ -271,8 +390,10 @@ const QuizStart = () => {
                             onChange={(e) => setSelectedAnswer([e.target.value])}
                         />
                         <Box mt={2}>
-                            {currentQuestionIndex > 0 && <Button variant="contained" color="secondary" onClick={() => handleAnswerSubmit(false)}>Previous</Button>}
-                            <Button variant="contained" color="primary" onClick={() => handleAnswerSubmit(true)}>Next</Button>
+                            {currentQuestionIndex > 0 && <Button variant="contained" color="secondary"
+                                                                 onClick={() => handleAnswerSubmit(false)}>Previous</Button>}
+                            <Button variant="contained" color="primary"
+                                    onClick={() => handleAnswerSubmit(true)}>Next</Button>
                         </Box>
                     </Box>
                 );
@@ -282,10 +403,11 @@ const QuizStart = () => {
     };
 
     return (
-        <Container component={Paper} style={{ padding: '20px', marginTop: '20px' }}>
+        <Container component={Paper} style={{padding: '20px', marginTop: '20px'}}>
             <Typography variant="h4" gutterBottom>Question {currentQuestionIndex + 1}</Typography>
             {renderQuestion()}
-            <Button variant="contained" color="error" onClick={handleQuitQuiz} style={{ marginTop: '20px' }}>Quit Quiz</Button>
+            <Button variant="contained" color="error" onClick={handleQuitQuiz} style={{marginTop: '20px'}}>Quit
+                Quiz</Button>
         </Container>
     );
 };

@@ -3,6 +3,7 @@ package timskiproekt.studyprep.Backend.WebController;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import timskiproekt.studyprep.Backend.Model.DTO.QuizDto;
+import timskiproekt.studyprep.Backend.Model.DTO.QuizRatingDto;
 import timskiproekt.studyprep.Backend.Model.entities.Quiz;
 import timskiproekt.studyprep.Backend.Service.QuizService;
 
@@ -34,6 +35,15 @@ public class QuizController {
     @GetMapping("/subject/{id}")
     public ResponseEntity<List<Quiz>> findBySubjectId(@PathVariable int id) {
         List<Quiz> response = quizService.findBySubjectId(id);
+        if (response.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok().body(response);
+    }
+
+    @GetMapping("/subject/{id}/ratings")
+    public ResponseEntity<List<QuizRatingDto>> findBySubjectIdWithRatings(@PathVariable int id) {
+        List<QuizRatingDto> response = quizService.findAllWithRatings(id);
         if (response.isEmpty()) {
             return ResponseEntity.notFound().build();
         }

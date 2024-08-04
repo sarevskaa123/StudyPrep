@@ -16,7 +16,7 @@ const SubjectDetail = () => {
 
     const fetchQuizzes = useCallback(async () => {
         try {
-            const response = await axios.get(`/quizzes/subject/${subjectId}`);
+            const response = await axios.get(`/quizzes/subject/${subjectId}/ratings`);
             setQuizzes(response.data || []);
         } catch (error) {
             console.error('Error fetching quizzes:', error);
@@ -46,6 +46,8 @@ const SubjectDetail = () => {
             const response = await axios.post(endpoint, { quizTitle: newQuizName.trim() });
             setQuizzes([...quizzes, response.data]);
             setNewQuizName('');
+            window.location.reload();
+
         } catch (error) {
             console.error('Error adding quiz:', error);
         }
@@ -54,7 +56,7 @@ const SubjectDetail = () => {
     const handleDeleteQuiz = async (quizId) => {
         try {
             await axios.delete(`/quizzes/delete/${quizId}`);
-            setQuizzes(quizzes.filter(quiz => quiz.quizId !== quizId));
+            setQuizzes(quizzes.filter(quiz => quiz.quiz.quizId !== quizId));
         } catch (error) {
             console.error('Error deleting quiz:', error);
         }
@@ -81,19 +83,19 @@ const SubjectDetail = () => {
             <Box sx={{ display: 'grid', gap: 2 }}>
                 {Array.isArray(quizzes) && quizzes.length > 0 ? (
                     quizzes.map((quiz) => (
-                        <Card key={quiz.quizId} variant="outlined">
+                        <Card key={quiz.quiz.quizId} variant="outlined">
                             <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <Typography variant="h6">
-                                    {quiz.quizTitle}
+                                    {quiz.quiz.quizTitle} - ({quiz.averageRating} of 5) {quiz.totalTimesRated} times rated
                                 </Typography>
                                 <Box>
-                                    <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteQuiz(quiz.quizId)}>
+                                    <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteQuiz(quiz.quiz.quizId)}>
                                         <DeleteIcon />
                                     </IconButton>
-                                    <IconButton edge="end" component={Link} to={`/quizzes/edit/${quiz.quizId}`}>
+                                    <IconButton edge="end" component={Link} to={`/quizzes/edit/${quiz.quiz.quizId}`}>
                                         <EditIcon />
                                     </IconButton>
-                                    <IconButton edge="end" component={Link} to={`/quizzes/start/${quiz.quizId}`}>
+                                    <IconButton edge="end" component={Link} to={`/quizzes/start/${quiz.quiz.quizId}`}>
                                         <PlayArrowIcon />
                                     </IconButton>
                                 </Box>

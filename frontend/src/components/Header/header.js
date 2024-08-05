@@ -19,8 +19,8 @@ const Header = () => {
 
     const authenticate = localStorage.getItem("Username") ? (
         <Box display="flex" alignItems="center">
-            <Button color="inherit" component={Link} to="/subjects">Subjects</Button>
-            <Button color="inherit" component={Link} to="/leaderboard">Leaderboard</Button>
+            {/*<Button color="inherit" component={Link} to="/subjects">Subjects</Button>
+            <Button color="inherit" component={Link} to="/leaderboard">Leaderboard</Button>*/}
             <Button color="inherit" component={Link} to="/profile">Profile</Button>
             <Button color="inherit" onClick={handleLogout}>Logout</Button>
         </Box>
@@ -41,6 +41,8 @@ const Header = () => {
                     Study Prep
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Button color="inherit" component={Link} to="/subjects">Subjects</Button>
+                    <Button color="inherit" component={Link} to="/leaderboard">Leaderboard</Button>
                     {authenticate}
                 </Box>
             </Toolbar>

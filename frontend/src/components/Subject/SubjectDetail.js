@@ -67,6 +67,7 @@ const SubjectDetail = () => {
             <Typography variant="h4" component="div" gutterBottom>
                 {subject ? subject.subjectName : 'Loading...'}
             </Typography>
+            { localStorage.getItem("Userrole") === "ADMIN" ? (
             <Box component="form" onSubmit={handleAddQuiz} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <TextField
                     variant="outlined"
@@ -79,25 +80,31 @@ const SubjectDetail = () => {
                 <Button type="submit" variant="contained" color="primary" endIcon={<AddIcon />}>
                     Add Quiz
                 </Button>
-            </Box>
+            </Box>) : (<div></div>)}
             <Box sx={{ display: 'grid', gap: 2 }}>
                 {Array.isArray(quizzes) && quizzes.length > 0 ? (
                     quizzes.map((quiz) => (
                         <Card key={quiz.quiz.quizId} variant="outlined">
                             <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <Typography variant="h6">
-                                    {quiz.quiz.quizTitle} - ({quiz.averageRating} of 5) {quiz.totalTimesRated} times rated
+                                    {quiz.quiz.quizTitle} - ({quiz.averageRating} of 5) {quiz.totalTimesRated} ratings
                                 </Typography>
                                 <Box>
+                                    { localStorage.getItem("Userrole") === "ADMIN" ? (
                                     <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteQuiz(quiz.quiz.quizId)}>
                                         <DeleteIcon />
                                     </IconButton>
+                                    ) :(<div></div>)}
+                                    { localStorage.getItem("Userrole") === "ADMIN" ? (
                                     <IconButton edge="end" component={Link} to={`/quizzes/edit/${quiz.quiz.quizId}`}>
                                         <EditIcon />
                                     </IconButton>
+                                    ) :(<div></div>)}
+                                    { localStorage.getItem("UserId") ? (
                                     <IconButton edge="end" component={Link} to={`/quizzes/start/${quiz.quiz.quizId}`}>
                                         <PlayArrowIcon />
                                     </IconButton>
+                                    ) :(<div></div>)}
                                 </Box>
                             </CardContent>
                         </Card>

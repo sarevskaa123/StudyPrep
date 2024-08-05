@@ -51,6 +51,7 @@ const Subject = () => {
             <Typography variant="h4" component="div" gutterBottom>
                 Subjects
             </Typography>
+            { localStorage.getItem("Userrole") === "ADMIN" ? (
             <Box component="form" onSubmit={handleAddSubject} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <TextField
                     variant="outlined"
@@ -64,7 +65,8 @@ const Subject = () => {
                     Add Subject
                 </Button>
             </Box>
-            <Box sx={{ display: 'grid', gap: 2 }}>
+            ) : (<div></div>)}
+                <Box sx={{ display: 'grid', gap: 2 }}>
                 {subjects.map((subject) => (
                     <Card key={subject.subjectId} variant="outlined">
                         <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -72,10 +74,12 @@ const Subject = () => {
                                 {subject.subjectName}
                             </Typography>
                             <Box>
+                                { localStorage.getItem("Userrole") === "ADMIN" ? (
                                 <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteSubject(subject.subjectId)}>
                                     <DeleteIcon />
                                 </IconButton>
-                                <IconButton edge="end" component={Link} to={`/subjects/${subject.subjectId}`}>
+                                ):(<div></div>)}
+                                    <IconButton edge="end" component={Link} to={`/subjects/${subject.subjectId}`}>
                                     <EditIcon />
                                 </IconButton>
                             </Box>

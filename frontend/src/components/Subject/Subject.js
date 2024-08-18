@@ -71,7 +71,9 @@ const Subject = () => {
                     <Card key={subject.subjectId} variant="outlined">
                         <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <Typography variant="h6">
+                                <IconButton edge="end" component={Link} to={`/subjects/${subject.subjectId}`} sx={{ color: 'white' }}>
                                 {subject.subjectName}
+                                </IconButton>
                             </Typography>
                             <Box>
                                 { localStorage.getItem("Userrole") === "ADMIN" ? (
@@ -79,9 +81,11 @@ const Subject = () => {
                                     <DeleteIcon />
                                 </IconButton>
                                 ):(<div></div>)}
+                                { localStorage.getItem("Userrole") === "ADMIN" ? (
                                     <IconButton edge="end" component={Link} to={`/subjects/${subject.subjectId}`}>
                                     <EditIcon />
                                 </IconButton>
+                                ):(<div></div>)}
                             </Box>
                         </CardContent>
                     </Card>

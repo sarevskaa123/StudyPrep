@@ -1,6 +1,6 @@
 // src/components/Subject/SubjectDetail.js
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from "../../custom-axios/axios";
 import { Container, Typography, TextField, Button, Card, CardContent, IconButton, Box } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -13,6 +13,7 @@ const SubjectDetail = () => {
     const [subject, setSubject] = useState(null);
     const [quizzes, setQuizzes] = useState([]);
     const [newQuizName, setNewQuizName] = useState('');
+    const navigate = useNavigate()
 
     const fetchQuizzes = useCallback(async () => {
         try {
@@ -86,9 +87,12 @@ const SubjectDetail = () => {
                     quizzes.map((quiz) => (
                         <Card key={quiz.quiz.quizId} variant="outlined">
                             <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <Typography variant="h6">
+                                { quiz.totalTimesRated === 0 ?
+                                    (<Typography variant="h6">{quiz.quiz.quizTitle} - 0 ratings</Typography>)
+                                    : (<Typography variant="h6">
                                     {quiz.quiz.quizTitle} - ({quiz.averageRating} of 5) {quiz.totalTimesRated} ratings
-                                </Typography>
+                                </Typography>)
+                                }
                                 <Box>
                                     { localStorage.getItem("Userrole") === "ADMIN" ? (
                                     <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteQuiz(quiz.quiz.quizId)}>
@@ -112,6 +116,11 @@ const SubjectDetail = () => {
                 ) : (
                     <Typography variant="body1" color="text.secondary">No quizzes available</Typography>
                 )}
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button variant="contained" onClick={() => navigate(-1)} sx={{ width: '100px' }}>
+                        Go Back
+                    </Button>
+                </Box>
             </Box>
         </Container>
     );

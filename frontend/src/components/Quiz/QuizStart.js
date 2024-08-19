@@ -135,37 +135,47 @@ const QuizStart = () => {
         setSelectedAnswer(updatedSelectedAnswer);
     };
 
-    const handleAnswerSubmit = (moveNext = true) => {
-        const currentQuestion = questions[currentQuestionIndex];
-        let isCorrect;
+    const loadCorrectAnswers = (currentQuestion) => {
         let correctAnswer;
 
         if (currentQuestion.questionType === 'Multiple') {
             const correctAnswers = [currentQuestion.correct1, currentQuestion.correct2, currentQuestion.correct3, currentQuestion.correct4];
-            const userSelectedAnswers = selectedAnswer.map((selected, index) => selected ? currentQuestion[`answerOption${index + 1}`] : null).filter(Boolean);
             const correctAnswerOptions = correctAnswers.map((correct, index) => correct ? currentQuestion[`answerOption${index + 1}`] : null).filter(Boolean);
-            isCorrect = correctAnswerOptions.length === userSelectedAnswers.length &&
-                correctAnswerOptions.every((answer) => userSelectedAnswers.includes(answer));
 
             correctAnswer = correctAnswerOptions.join(', ');
         } else if (currentQuestion.questionType === 'Bool') {
-            isCorrect = selectedAnswer[0]?.toLowerCase() === currentQuestion.correctAnswer.toString().toLowerCase();
+            correctAnswer = currentQuestion.correctAnswer ? 'true' : 'false';
         } else {
-            isCorrect = selectedAnswer[0] === currentQuestion.correctAnswer;
             correctAnswer = currentQuestion.correctAnswer;
         }
 
-        const userAnswerText = currentQuestion.questionType === 'Multiple'
-            ? selectedAnswer.map((selected, index) => selected ? currentQuestion[`answerOption${index + 1}`] : null).filter(Boolean).join(', ')
+        return correctAnswer
+    }
+
+    const handleAnswerSubmit = (moveNext = true) => {
+        const currentQuestion = userAnswers[currentQuestionIndex];
+        let isCorrect;
+
+        const userAnswerText = currentQuestion.question.questionType === 'Multiple'
+            ? selectedAnswer.map((selected, index) => selected ? currentQuestion.question[`answerOption${index + 1}`] : null).filter(Boolean).join(', ')
             : selectedAnswer[0];
+
+        if (currentQuestion.question.questionType === 'Multiple') {
+            isCorrect = currentQuestion.correctAnswer === userAnswerText
+            console.log(currentQuestion.correctAnswer)
+            console.log(userAnswerText)
+        } else if (currentQuestion.question.questionType === 'Bool') {
+            isCorrect = selectedAnswer[0]?.toLowerCase() === currentQuestion.correctAnswer.toString().toLowerCase();
+        } else {
+            isCorrect = selectedAnswer[0] === currentQuestion.correctAnswer;
+        }
 
         const updatedUserAnswers = [...userAnswers];
         updatedUserAnswers[currentQuestionIndex] = {
-            question: currentQuestion,
+            ...currentQuestion,
             isCorrect,
             userAnswer: userAnswerText,
-            correctAnswer,
-            selectedAnswer
+            selectedAnswer,
         };
         setUserAnswers(updatedUserAnswers);
 
@@ -218,6 +228,7 @@ const QuizStart = () => {
                 points: answer.isCorrect ? 1 : 0
             };
         });
+
         const attemptData = {
             startTime,
             finishTime: new Date(),
@@ -267,8 +278,23 @@ const QuizStart = () => {
     };
 
     if (showResults) {
+        console.log(startTime + endTime);
+        console.log(userAnswers);
         const timeTaken = (endTime - startTime) / 1000;
-        const incorrectAnswers = userAnswers.filter(answer => !answer.isCorrect);
+        const incorrectAnswers = userAnswers
+            .filter((answer) => !answer.isCorrect)
+            .sort((a, b) => userAnswers.indexOf(a) - userAnswers.indexOf(b))
+            .map(item => ({
+                ...item,
+                questionNumber: userAnswers.indexOf(item) + 1
+            }));
+        const correctAnswers = userAnswers
+            .filter((answer) => answer.isCorrect)
+            .sort((a, b) => userAnswers.indexOf(a) - userAnswers.indexOf(b))
+            .map(item => ({
+                ...item,
+                questionNumber: userAnswers.indexOf(item) + 1
+            }));
 
         return (
             <Container>
@@ -278,16 +304,32 @@ const QuizStart = () => {
                             style={{color: '#4caf50'}}>Score: {score} / {questions.length}</Typography>
                 <Typography variant="h5" gutterBottom style={{color: '#ff9800'}}>Time
                     Taken: {timeTaken.toFixed(2)} seconds</Typography>
+                <Typography variant="h4" gutterBottom style={{color: '#40b745'}}>Correct Answers</Typography>
+                <Grid container spacing={3} style={{padding: '20px'}}>
+                    {correctAnswers.map((answer, index) => (
+                        <Grid item xs={12} key={index}>
+                            <Paper elevation={3} style={{padding: '10px', backgroundColor: '#f8f9fa'}}>
+                                <Typography
+                                    variant="body1"><strong>Question {answer.questionNumber}:</strong> {answer.question.questionText}
+                                </Typography>
+                                <Box mt={2}>
+                                    <Typography variant="body2" style={{color: 'green'}}><strong>Correct
+                                        Answer:</strong> {answer.correctAnswer}</Typography>
+                                </Box>
+                            </Paper>
+                        </Grid>
+                    ))}
+                </Grid>
                 <Typography variant="h4" gutterBottom style={{color: '#f44336'}}>Incorrect Answers</Typography>
                 {incorrectAnswers.length === 0 ? (
                     <Typography variant="body1">There are no incorrect answers. Great job!</Typography>
                 ) : (
-                    <Grid container spacing={2}>
+                    <Grid container spacing={3} style={{padding: '20px'}}>
                         {incorrectAnswers.map((answer, index) => (
                             <Grid item xs={12} key={index}>
                                 <Paper elevation={3} style={{padding: '10px', backgroundColor: '#f8f9fa'}}>
                                     <Typography
-                                        variant="body1"><strong>Question:</strong> {answer.question.questionText}
+                                        variant="body1"><strong>Question {answer.questionNumber}:</strong> {answer.question.questionText}
                                     </Typography>
                                     <Box mt={2}>
                                         <Typography variant="body2" style={{color: 'red'}}><strong>Your
@@ -307,7 +349,7 @@ const QuizStart = () => {
                             </Typography>
                             {error && <Alert severity="error">{error}</Alert>}
                             {success && <Alert severity="success">{success}</Alert>}
-                            <Box component="form" onSubmit={handleSubmitRating} sx={{ mt: 2 }}>
+                            <Box component="form" onSubmit={handleSubmitRating} sx={{mt: 2}}>
                                 <TextField
                                     select
                                     label="Rating"
@@ -328,7 +370,7 @@ const QuizStart = () => {
                                 </Button>
                             </Box>
                         </Container>
-                        )
+                    )
                     : (
                         <Typography variant="body1">You have already left a rating.</Typography>
                     )}

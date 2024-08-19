@@ -7,7 +7,9 @@ import timskiproekt.studyprep.Backend.Model.DTO.QuizRatingDto;
 import timskiproekt.studyprep.Backend.Model.entities.Quiz;
 import timskiproekt.studyprep.Backend.Service.QuizService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
@@ -29,6 +31,17 @@ public class QuizController {
     public ResponseEntity<Quiz> findById(@PathVariable int id) {
         return quizService.findById(id)
                 .map(quiz -> ResponseEntity.ok().body(quiz))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{id}/subjectId")
+    public ResponseEntity<Map<String, String>> findSubjectIdByQuizId(@PathVariable int id) {
+        return quizService.findById(id)
+                .map(quiz -> {
+                    Map<String, String> response = new HashMap<>();
+                    response.put("subjectId", String.valueOf(quiz.getSubject().getSubjectId()));
+                    return ResponseEntity.ok(response);
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {useParams, useNavigate, Form} from 'react-router-dom';
+import {useParams, useNavigate} from 'react-router-dom';
 import axios from "../../custom-axios/axios";
 import {
     Button,
@@ -15,7 +15,12 @@ import {
     Paper,
     Grid,
     Alert,
-    MenuItem
+    MenuItem,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle
 } from '@mui/material';
 
 const QuizStart = () => {
@@ -30,25 +35,49 @@ const QuizStart = () => {
     const [selectedAnswer, setSelectedAnswer] = useState([]);
     const [subjectId, setSubjectId] = useState(null);
     const [quizFinished, setQuizFinished] = useState(false);
-    const navigate = useNavigate();
     const [rating, setRating] = useState(false);
     const [ratingScore, setRatingScore] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [timer, setTimer] = useState(null);
+    const [timeRemaining, setTimeRemaining] = useState(null);
+    const [timerDialogOpen, setTimerDialogOpen] = useState(true);
+    const [questionCount, setQuestionCount] = useState(10);
+    const [inputMinutes, setInputMinutes] = useState('');
+    const [timerDuration, setTimerDuration] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchQuestions = async () => {
             try {
-                const response = await axios.get(`/questions/quiz/random/${quizId}?count=10`);
-                setQuestions(response.data);
-                setStartTime(new Date());
+                if (questions.length === 0) {
+                    const response = await axios.get(`/questions/quiz/random/${quizId}?count=${questionCount}`);
+                    setQuestions(response.data);
 
+                    if (userAnswers.length === 0) {
+                        setStartTime(new Date());
+                        let questionsToBeAnswered = response.data.map(
+                            (question) => ({
+                                isCorrect: false,
+                                question: question,
+                                correctAnswer: loadCorrectAnswers(question)
+                            })
+                        );
+                        setUserAnswers(questionsToBeAnswered);
+                    }
+                    console.log(userAnswers);
+                }
+
+                if (!rating) {
                 const ratingResponse = await axios.get(`/rating/${quizId}/${localStorage.getItem("UserId")}`);
-                setRating(ratingResponse.data)
-                console.log(ratingResponse.data)
+                setRating(ratingResponse.data);
+                }
 
-                const quizResponse = await axios.get(`/api/quizzes/${quizId}`);
-                setSubjectId(quizResponse.data.subjectId.subjectId);
+                if (!subjectId) {
+                    const quizResponse = await axios.get(`/quizzes/${quizId}/subjectId`);
+                    console.log(quizResponse);
+                    setSubjectId(quizResponse.data.subjectId);
+                }
             } catch (error) {
                 console.error('Error fetching questions:', error);
             }
@@ -58,10 +87,47 @@ const QuizStart = () => {
     }, [quizId]);
 
     useEffect(() => {
+        let interval;
+        if (timer !== null) {
+            interval = setInterval(() => {
+                setTimeRemaining(prevTime => {
+                    if (prevTime <= 1) {
+                        clearInterval(interval);
+                        setEndTime(new Date(startTime.getTime() + timerDuration * 60000));
+                        setShowResults(true);
+                        setQuizFinished(true);
+                        return 0;
+                    }
+                    return prevTime - 1;
+                });
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [timer]);
+
+    useEffect(() => {
         if (quizFinished) {
             saveAttempt();
         }
     }, [score, quizFinished]);
+
+    const handleTimerInputChange = (e) => {
+        setInputMinutes(e.target.value);
+    };
+
+    const handleTimerConfirm = () => {
+        const minutes = parseInt(inputMinutes, 10);
+        setTimerDuration(minutes);
+        if (!isNaN(minutes) && minutes > 0) {
+            setTimeRemaining(minutes * 60);
+            setTimer(true);
+            setTimerDialogOpen(false);
+        }
+    };
+
+    const handleNoTimer = () => {
+        setTimerDialogOpen(false);
+    };
 
     const handleAnswerSelect = (index, isChecked) => {
         const updatedSelectedAnswer = [...selectedAnswer];
@@ -84,7 +150,6 @@ const QuizStart = () => {
             correctAnswer = correctAnswerOptions.join(', ');
         } else if (currentQuestion.questionType === 'Bool') {
             isCorrect = selectedAnswer[0]?.toLowerCase() === currentQuestion.correctAnswer.toString().toLowerCase();
-            correctAnswer = currentQuestion.correctAnswer ? 'True' : 'False';
         } else {
             isCorrect = selectedAnswer[0] === currentQuestion.correctAnswer;
             correctAnswer = currentQuestion.correctAnswer;
@@ -157,8 +222,8 @@ const QuizStart = () => {
             startTime,
             finishTime: new Date(),
             finalResult: score,
-            user: {userId: userId}, // Use the stored user ID
-            quiz: {quizId: quizId},
+            user: {userId},
+            quiz: {quizId},
             historyQuiz: questionAttempts
         };
 
@@ -186,7 +251,7 @@ const QuizStart = () => {
 
         const rating = {
             ratingScore,
-            userId: localStorage.getItem("UserId") ,
+            userId: localStorage.getItem("UserId"),
             quizId: quizId
         };
 
@@ -194,13 +259,12 @@ const QuizStart = () => {
             await axios.post('/rating', rating);
             setSuccess('Rating submitted successfully');
             setError('');
-            navigate('/')
+            navigate('/');
         } catch (error) {
             setError('Error submitting rating. Please try again.');
             setSuccess('');
         }
     };
-
 
     if (showResults) {
         const timeTaken = (endTime - startTime) / 1000;
@@ -404,10 +468,45 @@ const QuizStart = () => {
 
     return (
         <Container component={Paper} style={{padding: '20px', marginTop: '20px'}}>
+            <Dialog
+                open={timerDialogOpen}
+                onClose={handleNoTimer}
+                aria-labelledby="timer-dialog-title"
+                aria-describedby="timer-dialog-description"
+            >
+                <DialogTitle id="timer-dialog-title">Set a Timer</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="timer-dialog-description">
+                        Do you want to set a timer for the quiz? If yes, please enter the number of minutes.
+                    </DialogContentText>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Minutes"
+                        type="number"
+                        fullWidth
+                        variant="standard"
+                        value={inputMinutes}
+                        onChange={handleTimerInputChange}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleNoTimer} color="primary">
+                        No Timer
+                    </Button>
+                    <Button onClick={handleTimerConfirm} color="primary" disabled={!inputMinutes}>
+                        OK
+                    </Button>
+                </DialogActions>
+            </Dialog>
             <Typography variant="h4" gutterBottom>Question {currentQuestionIndex + 1}</Typography>
             {renderQuestion()}
             <Button variant="contained" color="error" onClick={handleQuitQuiz} style={{marginTop: '20px'}}>Quit
                 Quiz</Button>
+            {timeRemaining !== null && (
+                <Typography variant="h6" style={{marginTop: '20px', color: 'red'}}>Time
+                    Remaining: {Math.floor(timeRemaining / 60)}:{timeRemaining % 60}</Typography>
+            )}
         </Container>
     );
 };

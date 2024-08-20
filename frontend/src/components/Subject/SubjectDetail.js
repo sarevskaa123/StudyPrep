@@ -1,19 +1,22 @@
-// src/components/Subject/SubjectDetail.js
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from "../../custom-axios/axios";
-import { Container, Typography, TextField, Button, Card, CardContent, IconButton, Box } from '@mui/material';
+import { Container, Typography, TextField, Button, Card, CardContent, IconButton, Box, CircularProgress } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import AddIcon from '@mui/icons-material/Add';
+import { useTheme } from '@mui/material/styles';
 
 const SubjectDetail = () => {
     const { subjectId } = useParams();
     const [subject, setSubject] = useState(null);
     const [quizzes, setQuizzes] = useState([]);
     const [newQuizName, setNewQuizName] = useState('');
-    const navigate = useNavigate()
+    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
+
+    const theme = useTheme();
 
     const fetchQuizzes = useCallback(async () => {
         try {
@@ -21,6 +24,8 @@ const SubjectDetail = () => {
             setQuizzes(response.data || []);
         } catch (error) {
             console.error('Error fetching quizzes:', error);
+        } finally {
+            setLoading(false);
         }
     }, [subjectId]);
 
@@ -66,55 +71,68 @@ const SubjectDetail = () => {
     return (
         <Container maxWidth="md">
             <Typography variant="h4" component="div" gutterBottom>
-                {subject ? subject.subjectName : 'Loading...'}
+                {subject ? subject.subjectName : <CircularProgress />}
             </Typography>
-            { localStorage.getItem("Userrole") === "ADMIN" ? (
-            <Box component="form" onSubmit={handleAddQuiz} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <TextField
-                    variant="outlined"
-                    label="Enter new quiz name"
-                    value={newQuizName}
-                    onChange={(e) => setNewQuizName(e.target.value)}
-                    fullWidth
-                    sx={{ mr: 2 }}
-                />
-                <Button type="submit" variant="contained" color="primary" endIcon={<AddIcon />}>
-                    Add Quiz
-                </Button>
-            </Box>) : (<div></div>)}
+            {localStorage.getItem("Userrole") === "ADMIN" ? (
+                <Box component="form" onSubmit={handleAddQuiz} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <TextField
+                        variant="outlined"
+                        label="Enter new quiz name"
+                        value={newQuizName}
+                        onChange={(e) => setNewQuizName(e.target.value)}
+                        fullWidth
+                        sx={{ mr: 2 }}
+                    />
+                    <Button type="submit" variant="contained" color="primary" endIcon={<AddIcon />}>
+                        Add Quiz
+                    </Button>
+                </Box>
+            ) : (<div></div>)}
             <Box sx={{ display: 'grid', gap: 2 }}>
-                {Array.isArray(quizzes) && quizzes.length > 0 ? (
-                    quizzes.map((quiz) => (
-                        <Card key={quiz.quiz.quizId} variant="outlined">
+                {loading ? (
+                    <CircularProgress />
+                ) : Array.isArray(quizzes) && quizzes.length > 0 ? (
+                    quizzes.map((quiz, index) => (
+                        <Card
+                            key={quiz.quiz.quizId}
+                            variant="outlined"
+                            sx={{
+                                backgroundImage: index % 2 === 0
+                                    ? `linear-gradient(to left, ${theme.palette.background.default}, ${theme.palette.action.hover})`
+                                    : `linear-gradient(to right, ${theme.palette.background.default}, ${theme.palette.action.hover})`,
+                                transition: 'background-color 0.3s ease',
+                            }}
+                        >
                             <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                { quiz.totalTimesRated === 0 ?
-                                    (<Typography variant="h6">{quiz.quiz.quizTitle} - 0 ratings</Typography>)
-                                    : (<Typography variant="h6">
-                                    {quiz.quiz.quizTitle} - ({quiz.averageRating} of 5) {quiz.totalTimesRated} ratings
-                                </Typography>)
-                                }
+                                {quiz.totalTimesRated === 0 ? (
+                                    <Typography variant="h6">{quiz.quiz.quizTitle} - 0 ratings</Typography>
+                                ) : (
+                                    <Typography variant="h6">
+                                        {quiz.quiz.quizTitle} - ({quiz.averageRating} of 5) {quiz.totalTimesRated} ratings
+                                    </Typography>
+                                )}
                                 <Box>
-                                    { localStorage.getItem("Userrole") === "ADMIN" ? (
-                                    <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteQuiz(quiz.quiz.quizId)}>
-                                        <DeleteIcon />
-                                    </IconButton>
-                                    ) :(<div></div>)}
-                                    { localStorage.getItem("Userrole") === "ADMIN" ? (
-                                    <IconButton edge="end" component={Link} to={`/quizzes/edit/${quiz.quiz.quizId}`}>
-                                        <EditIcon />
-                                    </IconButton>
-                                    ) :(<div></div>)}
-                                    { localStorage.getItem("UserId") ? (
-                                    <IconButton edge="end" component={Link} to={`/quizzes/start/${quiz.quiz.quizId}`}>
-                                        <PlayArrowIcon />
-                                    </IconButton>
-                                    ) :(<div></div>)}
+                                    {localStorage.getItem("Userrole") === "ADMIN" ? (
+                                        <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteQuiz(quiz.quiz.quizId)} sx={{ mr: 0.25 }}>
+                                            <DeleteIcon />
+                                        </IconButton>
+                                    ) : (<div></div>)}
+                                    {localStorage.getItem("Userrole") === "ADMIN" ? (
+                                        <IconButton edge="end" component={Link} to={`/quizzes/edit/${quiz.quiz.quizId}`} sx={{ mx: 0.25 }}>
+                                            <EditIcon />
+                                        </IconButton>
+                                    ) : (<div></div>)}
+                                    {localStorage.getItem("UserId") ? (
+                                        <IconButton edge="end" component={Link} to={`/quizzes/start/${quiz.quiz.quizId}`} sx={{ ml: 0.25 }}>
+                                            <PlayArrowIcon />
+                                        </IconButton>
+                                    ) : (<div></div>)}
                                 </Box>
                             </CardContent>
                         </Card>
                     ))
                 ) : (
-                    <Typography variant="body1" color="text.secondary">No quizzes available</Typography>
+                    <CircularProgress />
                 )}
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <Button variant="contained" onClick={() => navigate(-1)} sx={{ width: '100px' }}>

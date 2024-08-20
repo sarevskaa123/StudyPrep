@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {useParams, useNavigate, Form} from 'react-router-dom';
+import {useParams, useNavigate} from 'react-router-dom';
 import axios from "../../custom-axios/axios";
 import {
     Button,
@@ -15,7 +15,12 @@ import {
     Paper,
     Grid,
     Alert,
-    MenuItem
+    MenuItem,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle
 } from '@mui/material';
 
 const QuizStart = () => {
@@ -30,25 +35,49 @@ const QuizStart = () => {
     const [selectedAnswer, setSelectedAnswer] = useState([]);
     const [subjectId, setSubjectId] = useState(null);
     const [quizFinished, setQuizFinished] = useState(false);
-    const navigate = useNavigate();
     const [rating, setRating] = useState(false);
     const [ratingScore, setRatingScore] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [timer, setTimer] = useState(null);
+    const [timeRemaining, setTimeRemaining] = useState(null);
+    const [timerDialogOpen, setTimerDialogOpen] = useState(true);
+    const [questionCount, setQuestionCount] = useState(10);
+    const [inputMinutes, setInputMinutes] = useState('');
+    const [timerDuration, setTimerDuration] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchQuestions = async () => {
             try {
-                const response = await axios.get(`/questions/quiz/random/${quizId}?count=10`);
-                setQuestions(response.data);
-                setStartTime(new Date());
+                if (questions.length === 0) {
+                    const response = await axios.get(`/questions/quiz/random/${quizId}?count=${questionCount}`);
+                    setQuestions(response.data);
 
+                    if (userAnswers.length === 0) {
+                        setStartTime(new Date());
+                        let questionsToBeAnswered = response.data.map(
+                            (question) => ({
+                                isCorrect: false,
+                                question: question,
+                                correctAnswer: loadCorrectAnswers(question)
+                            })
+                        );
+                        setUserAnswers(questionsToBeAnswered);
+                    }
+                    console.log(userAnswers);
+                }
+
+                if (!rating) {
                 const ratingResponse = await axios.get(`/rating/${quizId}/${localStorage.getItem("UserId")}`);
-                setRating(ratingResponse.data)
-                console.log(ratingResponse.data)
+                setRating(ratingResponse.data);
+                }
 
-                const quizResponse = await axios.get(`/api/quizzes/${quizId}`);
-                setSubjectId(quizResponse.data.subjectId.subjectId);
+                if (!subjectId) {
+                    const quizResponse = await axios.get(`/quizzes/${quizId}/subjectId`);
+                    console.log(quizResponse);
+                    setSubjectId(quizResponse.data.subjectId);
+                }
             } catch (error) {
                 console.error('Error fetching questions:', error);
             }
@@ -58,10 +87,47 @@ const QuizStart = () => {
     }, [quizId]);
 
     useEffect(() => {
+        let interval;
+        if (timer !== null) {
+            interval = setInterval(() => {
+                setTimeRemaining(prevTime => {
+                    if (prevTime <= 1) {
+                        clearInterval(interval);
+                        setEndTime(new Date(startTime.getTime() + timerDuration * 60000));
+                        setShowResults(true);
+                        setQuizFinished(true);
+                        return 0;
+                    }
+                    return prevTime - 1;
+                });
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [timer]);
+
+    useEffect(() => {
         if (quizFinished) {
             saveAttempt();
         }
     }, [score, quizFinished]);
+
+    const handleTimerInputChange = (e) => {
+        setInputMinutes(e.target.value);
+    };
+
+    const handleTimerConfirm = () => {
+        const minutes = parseInt(inputMinutes, 10);
+        setTimerDuration(minutes);
+        if (!isNaN(minutes) && minutes > 0) {
+            setTimeRemaining(minutes * 60);
+            setTimer(true);
+            setTimerDialogOpen(false);
+        }
+    };
+
+    const handleNoTimer = () => {
+        setTimerDialogOpen(false);
+    };
 
     const handleAnswerSelect = (index, isChecked) => {
         const updatedSelectedAnswer = [...selectedAnswer];
@@ -69,38 +135,47 @@ const QuizStart = () => {
         setSelectedAnswer(updatedSelectedAnswer);
     };
 
-    const handleAnswerSubmit = (moveNext = true) => {
-        const currentQuestion = questions[currentQuestionIndex];
-        let isCorrect;
+    const loadCorrectAnswers = (currentQuestion) => {
         let correctAnswer;
 
         if (currentQuestion.questionType === 'Multiple') {
             const correctAnswers = [currentQuestion.correct1, currentQuestion.correct2, currentQuestion.correct3, currentQuestion.correct4];
-            const userSelectedAnswers = selectedAnswer.map((selected, index) => selected ? currentQuestion[`answerOption${index + 1}`] : null).filter(Boolean);
             const correctAnswerOptions = correctAnswers.map((correct, index) => correct ? currentQuestion[`answerOption${index + 1}`] : null).filter(Boolean);
-            isCorrect = correctAnswerOptions.length === userSelectedAnswers.length &&
-                correctAnswerOptions.every((answer) => userSelectedAnswers.includes(answer));
 
             correctAnswer = correctAnswerOptions.join(', ');
         } else if (currentQuestion.questionType === 'Bool') {
-            isCorrect = selectedAnswer[0]?.toLowerCase() === currentQuestion.correctAnswer.toString().toLowerCase();
-            correctAnswer = currentQuestion.correctAnswer ? 'True' : 'False';
+            correctAnswer = currentQuestion.correctAnswer ? 'true' : 'false';
         } else {
-            isCorrect = selectedAnswer[0] === currentQuestion.correctAnswer;
             correctAnswer = currentQuestion.correctAnswer;
         }
 
-        const userAnswerText = currentQuestion.questionType === 'Multiple'
-            ? selectedAnswer.map((selected, index) => selected ? currentQuestion[`answerOption${index + 1}`] : null).filter(Boolean).join(', ')
+        return correctAnswer
+    }
+
+    const handleAnswerSubmit = (moveNext = true) => {
+        const currentQuestion = userAnswers[currentQuestionIndex];
+        let isCorrect;
+
+        const userAnswerText = currentQuestion.question.questionType === 'Multiple'
+            ? selectedAnswer.map((selected, index) => selected ? currentQuestion.question[`answerOption${index + 1}`] : null).filter(Boolean).join(', ')
             : selectedAnswer[0];
+
+        if (currentQuestion.question.questionType === 'Multiple') {
+            isCorrect = currentQuestion.correctAnswer === userAnswerText
+            console.log(currentQuestion.correctAnswer)
+            console.log(userAnswerText)
+        } else if (currentQuestion.question.questionType === 'Bool') {
+            isCorrect = selectedAnswer[0]?.toLowerCase() === currentQuestion.correctAnswer.toString().toLowerCase();
+        } else {
+            isCorrect = selectedAnswer[0] === currentQuestion.correctAnswer;
+        }
 
         const updatedUserAnswers = [...userAnswers];
         updatedUserAnswers[currentQuestionIndex] = {
-            question: currentQuestion,
+            ...currentQuestion,
             isCorrect,
             userAnswer: userAnswerText,
-            correctAnswer,
-            selectedAnswer
+            selectedAnswer,
         };
         setUserAnswers(updatedUserAnswers);
 
@@ -153,12 +228,13 @@ const QuizStart = () => {
                 points: answer.isCorrect ? 1 : 0
             };
         });
+
         const attemptData = {
             startTime,
             finishTime: new Date(),
             finalResult: score,
-            user: {userId: userId}, // Use the stored user ID
-            quiz: {quizId: quizId},
+            user: {userId},
+            quiz: {quizId},
             historyQuiz: questionAttempts
         };
 
@@ -186,7 +262,7 @@ const QuizStart = () => {
 
         const rating = {
             ratingScore,
-            userId: localStorage.getItem("UserId") ,
+            userId: localStorage.getItem("UserId"),
             quizId: quizId
         };
 
@@ -194,17 +270,31 @@ const QuizStart = () => {
             await axios.post('/rating', rating);
             setSuccess('Rating submitted successfully');
             setError('');
-            navigate('/')
+            navigate('/');
         } catch (error) {
             setError('Error submitting rating. Please try again.');
             setSuccess('');
         }
     };
 
-
     if (showResults) {
+        console.log(startTime + endTime);
+        console.log(userAnswers);
         const timeTaken = (endTime - startTime) / 1000;
-        const incorrectAnswers = userAnswers.filter(answer => !answer.isCorrect);
+        const incorrectAnswers = userAnswers
+            .filter((answer) => !answer.isCorrect)
+            .sort((a, b) => userAnswers.indexOf(a) - userAnswers.indexOf(b))
+            .map(item => ({
+                ...item,
+                questionNumber: userAnswers.indexOf(item) + 1
+            }));
+        const correctAnswers = userAnswers
+            .filter((answer) => answer.isCorrect)
+            .sort((a, b) => userAnswers.indexOf(a) - userAnswers.indexOf(b))
+            .map(item => ({
+                ...item,
+                questionNumber: userAnswers.indexOf(item) + 1
+            }));
 
         return (
             <Container>
@@ -214,16 +304,32 @@ const QuizStart = () => {
                             style={{color: '#4caf50'}}>Score: {score} / {questions.length}</Typography>
                 <Typography variant="h5" gutterBottom style={{color: '#ff9800'}}>Time
                     Taken: {timeTaken.toFixed(2)} seconds</Typography>
+                <Typography variant="h4" gutterBottom style={{color: '#40b745'}}>Correct Answers</Typography>
+                <Grid container spacing={3} style={{padding: '20px'}}>
+                    {correctAnswers.map((answer, index) => (
+                        <Grid item xs={12} key={index}>
+                            <Paper elevation={3} style={{padding: '10px', backgroundColor: '#f8f9fa'}}>
+                                <Typography
+                                    variant="body1"><strong>Question {answer.questionNumber}:</strong> {answer.question.questionText}
+                                </Typography>
+                                <Box mt={2}>
+                                    <Typography variant="body2" style={{color: 'green'}}><strong>Correct
+                                        Answer:</strong> {answer.correctAnswer}</Typography>
+                                </Box>
+                            </Paper>
+                        </Grid>
+                    ))}
+                </Grid>
                 <Typography variant="h4" gutterBottom style={{color: '#f44336'}}>Incorrect Answers</Typography>
                 {incorrectAnswers.length === 0 ? (
                     <Typography variant="body1">There are no incorrect answers. Great job!</Typography>
                 ) : (
-                    <Grid container spacing={2}>
+                    <Grid container spacing={3} style={{padding: '20px'}}>
                         {incorrectAnswers.map((answer, index) => (
                             <Grid item xs={12} key={index}>
                                 <Paper elevation={3} style={{padding: '10px', backgroundColor: '#f8f9fa'}}>
                                     <Typography
-                                        variant="body1"><strong>Question:</strong> {answer.question.questionText}
+                                        variant="body1"><strong>Question {answer.questionNumber}:</strong> {answer.question.questionText}
                                     </Typography>
                                     <Box mt={2}>
                                         <Typography variant="body2" style={{color: 'red'}}><strong>Your
@@ -243,7 +349,7 @@ const QuizStart = () => {
                             </Typography>
                             {error && <Alert severity="error">{error}</Alert>}
                             {success && <Alert severity="success">{success}</Alert>}
-                            <Box component="form" onSubmit={handleSubmitRating} sx={{ mt: 2 }}>
+                            <Box component="form" onSubmit={handleSubmitRating} sx={{mt: 2}}>
                                 <TextField
                                     select
                                     label="Rating"
@@ -264,7 +370,7 @@ const QuizStart = () => {
                                 </Button>
                             </Box>
                         </Container>
-                        )
+                    )
                     : (
                         <Typography variant="body1">You have already left a rating.</Typography>
                     )}
@@ -404,10 +510,45 @@ const QuizStart = () => {
 
     return (
         <Container component={Paper} style={{padding: '20px', marginTop: '20px'}}>
+            <Dialog
+                open={timerDialogOpen}
+                onClose={handleNoTimer}
+                aria-labelledby="timer-dialog-title"
+                aria-describedby="timer-dialog-description"
+            >
+                <DialogTitle id="timer-dialog-title">Set a Timer</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="timer-dialog-description">
+                        Do you want to set a timer for the quiz? If yes, please enter the number of minutes.
+                    </DialogContentText>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Minutes"
+                        type="number"
+                        fullWidth
+                        variant="standard"
+                        value={inputMinutes}
+                        onChange={handleTimerInputChange}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleNoTimer} color="primary">
+                        No Timer
+                    </Button>
+                    <Button onClick={handleTimerConfirm} color="primary" disabled={!inputMinutes}>
+                        OK
+                    </Button>
+                </DialogActions>
+            </Dialog>
             <Typography variant="h4" gutterBottom>Question {currentQuestionIndex + 1}</Typography>
             {renderQuestion()}
             <Button variant="contained" color="error" onClick={handleQuitQuiz} style={{marginTop: '20px'}}>Quit
                 Quiz</Button>
+            {timeRemaining !== null && (
+                <Typography variant="h6" style={{marginTop: '20px', color: 'red'}}>Time
+                    Remaining: {Math.floor(timeRemaining / 60)}:{timeRemaining % 60}</Typography>
+            )}
         </Container>
     );
 };

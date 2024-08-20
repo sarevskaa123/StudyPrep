@@ -12,6 +12,7 @@ import timskiproekt.studyprep.Backend.Model.exceptions.UsernameAlreadyExistsExce
 import timskiproekt.studyprep.Backend.Repository.UserRepository;
 import timskiproekt.studyprep.Backend.Service.UserService;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -56,5 +57,11 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         return user;
     }
-
+    @Override
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
 }

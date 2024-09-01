@@ -94,7 +94,7 @@ const SubjectDetail = () => {
                 ) : Array.isArray(quizzes) && quizzes.length > 0 ? (
                     quizzes.map((quiz, index) => (
                         <Card
-                            key={quiz.quiz.quizId}
+                            key={quiz.quizId}
                             variant="outlined"
                             sx={{
                                 backgroundImage: index % 2 === 0
@@ -105,25 +105,25 @@ const SubjectDetail = () => {
                         >
                             <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 {quiz.totalTimesRated === 0 ? (
-                                    <Typography variant="h6">{quiz.quiz.quizTitle} - 0 ratings</Typography>
+                                    <Typography variant="h6">{quiz.quizTitle} - 0 ratings</Typography>
                                 ) : (
                                     <Typography variant="h6">
-                                        {quiz.quiz.quizTitle} - ({quiz.averageRating} of 5) {quiz.totalTimesRated} ratings
+                                        {quiz.quizTitle} - ({quiz.averageRating} of 5) {quiz.totalTimesRated} ratings
                                     </Typography>
                                 )}
                                 <Box>
                                     {localStorage.getItem("Userrole") === "ADMIN" ? (
-                                        <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteQuiz(quiz.quiz.quizId)} sx={{ mr: 0.25 }}>
+                                        <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteQuiz(quiz.quizId)} sx={{ mr: 0.25 }}>
                                             <DeleteIcon />
                                         </IconButton>
                                     ) : (<div></div>)}
                                     {localStorage.getItem("Userrole") === "ADMIN" ? (
-                                        <IconButton edge="end" component={Link} to={`/quizzes/edit/${quiz.quiz.quizId}`} sx={{ mx: 0.25 }}>
+                                        <IconButton edge="end" component={Link} to={`/quizzes/edit/${quiz.quizId}`} sx={{ mx: 0.25 }}>
                                             <EditIcon />
                                         </IconButton>
                                     ) : (<div></div>)}
                                     {localStorage.getItem("UserId") ? (
-                                        <IconButton edge="end" component={Link} to={`/quizzes/start/${quiz.quiz.quizId}`} sx={{ ml: 0.25 }}>
+                                        <IconButton edge="end" component={Link} to={`/quizzes/start/${quiz.quizId}`} sx={{ ml: 0.25 }}>
                                             <PlayArrowIcon />
                                         </IconButton>
                                     ) : (<div></div>)}

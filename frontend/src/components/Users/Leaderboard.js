@@ -1,5 +1,5 @@
 // src/components/Leaderboard/Leaderboard.js
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { Link } from "react-router-dom";
 import {
     Container,
@@ -12,11 +12,39 @@ import {
     TableRow,
     Paper,
     Button,
-    Box
+    Box, CircularProgress
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import axios from "axios";
 
-const Leaderboard = (props) => {
+const Leaderboard = () => {
+    const [leaderboardInfo, setLeaderboardInfo] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchLeaderboardInfo = async () => {
+            try {
+                const quizResponse = await axios.get(`http://localhost:8081/api/quizzes/leaderboard`);
+                setLeaderboardInfo(quizResponse.data);
+            } catch (err) {
+                setError(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchLeaderboardInfo();
+    }, []);
+
+    if (loading) return (
+        <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" height="100vh">
+            <CircularProgress />
+            <Typography variant="h6" component="div" mt={2}>Loading...</Typography>
+        </Box>
+    );
+    if (error) return <div>Error: {error.message}</div>;
+
     return (
         <Container maxWidth="md">
             <Box sx={{ textAlign: 'center', mb: 4 }}>
@@ -34,10 +62,10 @@ const Leaderboard = (props) => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {props.quizzes.map((q, index) => (
+                        {leaderboardInfo.map((q, index) => (
                             <TableRow key={index} sx={{ backgroundColor: index % 2 === 0 ? '#f1f1f1' : 'white' }}>
                                 <TableCell align="center">{q.quizTitle}</TableCell>
-                                <TableCell align="center">{q.subject?.subjectName || 'N/A'}</TableCell>
+                                <TableCell align="center">{q?.subjectName || 'N/A'}</TableCell>
                                 <TableCell align="center">
                                     <Button
                                         variant="contained"

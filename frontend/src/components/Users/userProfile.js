@@ -29,7 +29,7 @@ const UserInfo = () => {
                 const userId = localStorage.getItem('UserId');
                 const response = await axios.get(`http://localhost:8081/api/user/${userId}`);
                 setUserInfo(response.data);
-                console.log(response.data); // Log the received data for debugging
+                console.log('Received userInfo:', response.data);
             } catch (err) {
                 setError(err);
             } finally {
@@ -56,30 +56,30 @@ const UserInfo = () => {
                 <Typography variant="h4" component="h1" gutterBottom>
                     User Information
                 </Typography>
-                {userInfo && userInfo.user && (
+                {userInfo?.username && (
                     <Card variant="outlined" sx={{ mb: 4, backgroundColor: '#f9f9f9' }}>
                         <CardContent>
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                                 <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                                     <Typography variant="h6">Email:</Typography>
-                                    <Typography variant="body1">{userInfo.user.email}</Typography>
+                                    <Typography variant="body1">{userInfo?.email}</Typography>
                                 </Box>
                                 <Divider sx={{ my: 1, borderBottomWidth: 2, background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)' }} />
                                 <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                                     <Typography variant="h6">Register Date:</Typography>
-                                    <Typography variant="body1">{new Date(userInfo.user.registerDate).toLocaleString()}</Typography>
+                                    <Typography variant="body1">{new Date(userInfo?.registerDate).toLocaleString()}</Typography>
                                 </Box>
                                 <Divider sx={{ my: 1, borderBottomWidth: 2, background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)' }} />
                                 <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                                     <Typography variant="h6">Username:</Typography>
-                                    <Typography variant="body1">{userInfo.user.username}</Typography>
+                                    <Typography variant="body1">{userInfo?.username}</Typography>
                                 </Box>
                             </Box>
                         </CardContent>
                     </Card>
                 )}
                 <Typography variant="h5" component="h2" gutterBottom>
-                    All attempts for user {userInfo.user.username}
+                    All attempts for user {userInfo?.username}
                 </Typography>
                 <TableContainer component={Paper}>
                     <Table>
@@ -97,11 +97,11 @@ const UserInfo = () => {
                                 userInfo.attempts.map(attempt => (
                                     <TableRow key={attempt.attemptId} sx={{ backgroundColor: '#f1f1f1' }}>
                                         <TableCell align="center">
-                                            <Link to={`/attempt/${attempt.attemptId}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                                {attempt.quiz?.quizTitle || 'N/A'}
+                                            <Link to={`/attempt/${attempt.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                                {attempt.quizTitle || 'N/A'}
                                             </Link>
                                         </TableCell>
-                                        <TableCell align="center">{attempt.quiz?.subject?.subjectName || 'N/A'}</TableCell>
+                                        <TableCell align="center">{attempt.subjectName || 'N/A'}</TableCell>
                                         <TableCell align="center">{attempt.startTime ? new Date(attempt.startTime).toLocaleString() : 'N/A'}</TableCell>
                                         <TableCell align="center">{attempt.finishTime ? new Date(attempt.finishTime).toLocaleString() : 'N/A'}</TableCell>
                                         <TableCell align="center">{attempt.finalResult}</TableCell>

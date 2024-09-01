@@ -25,12 +25,13 @@ const LeaderboardQuiz = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchLeaderboardInfo = async () => {
+        const fetchLeaderboardQuizInfo = async () => {
             try {
-                const response = await axios.get(`http://localhost:8081/api/user/leaderboard/${quizId}`);
-                setLeaderboardInfo(response.data);
-                const response1 = await axios.get(`http://localhost:8081/api/quizzes/${quizId}`);
-                setQuizInfo(response1.data);
+                const attemptResponse = await axios.get(`http://localhost:8081/api/user/leaderboard/${quizId}`);
+                setLeaderboardInfo(attemptResponse.data);
+
+                const quizResponse = await axios.get(`http://localhost:8081/api/quizzes/leaderboard/${quizId}`);
+                setQuizInfo(quizResponse.data);
             } catch (err) {
                 setError(err);
             } finally {
@@ -38,7 +39,7 @@ const LeaderboardQuiz = () => {
             }
         };
 
-        fetchLeaderboardInfo();
+        fetchLeaderboardQuizInfo();
     }, [quizId]);
 
     if (loading) return (
@@ -61,10 +62,10 @@ const LeaderboardQuiz = () => {
                     {quizInfo.quizTitle}
                 </Typography>
                 <Typography variant="h6" component="h2" gutterBottom>
-                    Subject: {quizInfo.subject?.subjectName || 'N/A'}
+                    Subject: {quizInfo.subjectName || 'N/A'}
                 </Typography>
                 <Typography variant="body1" color="textSecondary">
-                    {quizInfo.quizDescription}
+                    {quizInfo.description}
                 </Typography>
             </Box>
             <TableContainer component={Paper}>
@@ -80,7 +81,7 @@ const LeaderboardQuiz = () => {
                     <TableBody>
                         {leaderboardInfo.map((l, index) => (
                             <TableRow key={index} sx={{ backgroundColor: index % 2 === 0 ? '#f1f1f1' : 'white' }}>
-                                <TableCell align="center">{l.user.username}</TableCell>
+                                <TableCell align="center">{l.username}</TableCell>
                                 <TableCell align="center">{formatDate(l.startTime)}</TableCell>
                                 <TableCell align="center">{formatDate(l.finishTime)}</TableCell>
                                 <TableCell align="center">{l.finalResult}</TableCell>

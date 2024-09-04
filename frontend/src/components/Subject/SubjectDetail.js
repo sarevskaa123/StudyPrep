@@ -4,9 +4,11 @@ import axios from "../../custom-axios/axios";
 import { Container, Typography, TextField, Button, Card, CardContent, IconButton, Box, CircularProgress } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import InfoIcon from '@mui/icons-material/Info';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import AddIcon from '@mui/icons-material/Add';
 import { useTheme } from '@mui/material/styles';
+import '@fontsource/roboto-slab';
 
 const SubjectDetail = () => {
     const { subjectId } = useParams();
@@ -59,6 +61,11 @@ const SubjectDetail = () => {
         }
     };
 
+    const handleClickToQuizInfo = quiz => {
+        // Navigate to the quiz info route and pass the quiz data
+        navigate(`/quizzes/info/${quiz.quizId}`, { state: { quiz } });
+    };
+
     const handleDeleteQuiz = async (quizId) => {
         try {
             await axios.delete(`/quizzes/delete/${quizId}`);
@@ -70,7 +77,21 @@ const SubjectDetail = () => {
 
     return (
         <Container maxWidth="md">
-            <Typography variant="h4" component="div" gutterBottom>
+            <Typography variant="h3"
+                        component="div"
+                        gutterBottom
+                        sx={{
+                            marginTop: 2.5,
+                            fontFamily: 'Roboto Slab, serif',
+                            fontWeight: 700,
+                            textAlign: 'center',
+                            background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            textShadow: `1px 1px 2px ${theme.palette.primary.dark}`,
+                            marginBottom: theme.spacing(4),
+                            letterSpacing: '0.05em',
+                        }}>
                 {subject ? subject.subjectName : <CircularProgress />}
             </Typography>
             {localStorage.getItem("Userrole") === "ADMIN" ? (
@@ -97,10 +118,28 @@ const SubjectDetail = () => {
                             key={quiz.quizId}
                             variant="outlined"
                             sx={{
+                                position: 'relative',
+                                overflow: 'hidden',
+                                textDecoration: 'none',
+                                color: 'inherit',
                                 backgroundImage: index % 2 === 0
                                     ? `linear-gradient(to left, ${theme.palette.background.default}, ${theme.palette.action.hover})`
                                     : `linear-gradient(to right, ${theme.palette.background.default}, ${theme.palette.action.hover})`,
-                                transition: 'background-color 0.3s ease',
+                                transition: 'background-color 0.5s ease', // Slower transition
+                                '&:hover::before': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    width: '100%',
+                                    height: '100%',
+                                    background: `linear-gradient(to right, ${theme.palette.action.hover} 50%, transparent 100%)`, // Lighter color
+                                    opacity: 0.9, // More visible hover effect
+                                    transition: 'opacity 0.5s ease-in-out', // Slower transition
+                                },
+                                '&:hover': {
+                                    transform: 'scale(1.02)',
+                                }
                             }}
                         >
                             <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -112,6 +151,9 @@ const SubjectDetail = () => {
                                     </Typography>
                                 )}
                                 <Box>
+                                    <IconButton edge="end" onClick={() => handleClickToQuizInfo(quiz)} sx={{ ml: 0.25 }}>
+                                        <InfoIcon />
+                                    </IconButton>
                                     {localStorage.getItem("Userrole") === "ADMIN" ? (
                                         <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteQuiz(quiz.quizId)} sx={{ mr: 0.25 }}>
                                             <DeleteIcon />

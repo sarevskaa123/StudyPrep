@@ -17,11 +17,15 @@ import {
     Divider,
     CircularProgress
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import '@fontsource/roboto-slab';
 
 const UserInfo = () => {
     const [userInfo, setUserInfo] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const theme = useTheme();
 
     useEffect(() => {
         const fetchUserInfo = async () => {
@@ -53,7 +57,21 @@ const UserInfo = () => {
     return (
         <Container maxWidth="lg">
             <Box sx={{ mb: 4 }}>
-                <Typography variant="h4" component="h1" gutterBottom>
+                <Typography  variant="h3"
+                             component="div"
+                             gutterBottom
+                             sx={{
+                                 marginTop: 2.5,
+                                 fontFamily: 'Roboto Slab, serif',
+                                 fontWeight: 700,
+                                 textAlign: 'center',
+                                 background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                                 WebkitBackgroundClip: 'text',
+                                 WebkitTextFillColor: 'transparent',
+                                 textShadow: `1px 1px 2px ${theme.palette.primary.dark}`,
+                                 marginBottom: theme.spacing(4),
+                                 letterSpacing: '0.05em',
+                             }}>
                     User Information
                 </Typography>
                 {userInfo?.username && (
@@ -78,7 +96,21 @@ const UserInfo = () => {
                         </CardContent>
                     </Card>
                 )}
-                <Typography variant="h5" component="h2" gutterBottom>
+                <Typography variant="h5"
+                            component="div"
+                            gutterBottom
+                            sx={{
+                                marginTop: 2.5,
+                                fontFamily: 'Roboto Slab, serif',
+                                fontWeight: 700,
+                                textAlign: 'center',
+                                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                textShadow: `1px 1px 2px ${theme.palette.primary.dark}`,
+                                marginBottom: theme.spacing(4),
+                                letterSpacing: '0.05em',
+                            }}>
                     All attempts for user {userInfo?.username}
                 </Typography>
                 <TableContainer component={Paper}>

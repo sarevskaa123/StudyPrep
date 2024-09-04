@@ -16,6 +16,7 @@ import UserInfo from "../Users/userProfile";
 import AttemptDetails from "../Users/AttemptDetails";
 import Leaderboard from "../Users/Leaderboard";
 import QuizStart from '../Quiz/QuizStart';
+import QuizInfo from '../Quiz/QuizInfo';
 import axios from 'axios'; // Add this import statement
 import theme from '../../theme/theme'; // Import the theme
 
@@ -73,6 +74,7 @@ class App extends Component {
                                 <Route path={"/editQuiz/:id"} element={
                                     <QuizEdit/>}/>
                                 <Route path={"/quizzes/edit/:quizId"} element={<QuizEdit/>}/>
+                                <Route path={"/quizzes/info/:quizId"} element={<QuizInfo/>}/>
                                 <Route path={"/profile"} element={<UserInfo/>}/>
                                 <Route path="/subjects" element={<Subject/>}/>
                                 <Route path="/subjects/:subjectId" element={

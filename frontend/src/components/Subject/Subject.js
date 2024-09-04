@@ -13,7 +13,6 @@ const Subject = () => {
     const [newSubjectName, setNewSubjectName] = useState('');
 
     const theme = useTheme();
-    const iconColor = theme.palette.mode === 'dark' ? 'white' : 'black';
 
     useEffect(() => {
         fetchSubjects();
@@ -121,7 +120,9 @@ const Subject = () => {
                     >
                         <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <Typography variant="h6">
+                                <IconButton edge="end" component={Link} to={`/subjects/${subject.subjectId}`}>
                                 {subject.subjectName}
+                                </IconButton>
                             </Typography>
                             <Box>
                                 {localStorage.getItem("Userrole") === "ADMIN" ? (

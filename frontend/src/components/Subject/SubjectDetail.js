@@ -69,7 +69,8 @@ const SubjectDetail = () => {
     const handleDeleteQuiz = async (quizId) => {
         try {
             await axios.delete(`/quizzes/delete/${quizId}`);
-            setQuizzes(quizzes.filter(quiz => quiz.quiz.quizId !== quizId));
+            setQuizzes(quizzes.filter(quiz => quiz.quizId !== quizId
+            ));
         } catch (error) {
             console.error('Error deleting quiz:', error);
         }

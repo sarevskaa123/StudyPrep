@@ -15,7 +15,7 @@ import {
     Card,
     CardContent,
     Divider,
-    CircularProgress
+    CircularProgress, TablePagination
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import '@fontsource/roboto-slab';
@@ -24,6 +24,8 @@ const UserInfo = () => {
     const [userInfo, setUserInfo] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [page, setPage] = useState(0);  // state for current page
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
     const theme = useTheme();
 
@@ -43,6 +45,15 @@ const UserInfo = () => {
 
         fetchUserInfo();
     }, []);
+
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
 
     if (loading) {
         return (
@@ -126,7 +137,7 @@ const UserInfo = () => {
                         </TableHead>
                         <TableBody>
                             {userInfo.attempts && userInfo.attempts.length > 0 ? (
-                                userInfo.attempts.map(attempt => (
+                                userInfo.attempts.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(attempt => (
                                     <TableRow key={attempt.attemptId} sx={{ backgroundColor: '#f1f1f1' }}>
                                         <TableCell align="center">
                                             <Link to={`/attempt/${attempt.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
@@ -147,6 +158,15 @@ const UserInfo = () => {
                         </TableBody>
                     </Table>
                 </TableContainer>
+                <TablePagination
+                    component="div"
+                    count={userInfo.attempts.length}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    rowsPerPage={rowsPerPage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    rowsPerPageOptions={[10]}
+                />
             </Box>
         </Container>
     );
